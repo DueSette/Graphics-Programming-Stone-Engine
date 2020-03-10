@@ -1,0 +1,4 @@
+WASD - Movement
+SPACE - Jump
+LEFT MOUSE - Spawn random item
+MOUSEWHEEL - Faster movement
