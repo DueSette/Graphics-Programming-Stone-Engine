@@ -28,8 +28,7 @@ void Shader::createShaderProgram()
 	CheckShaderError(program, GL_VALIDATE_STATUS, true, "Error: Shader program not valid");
 
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "u_Transform"); // associate with the location of uniform variable within a program
-	uniforms[TIME_U] = glGetUniformLocation(program, "u_Time"); //if a uniform is not found it won't cause throw an exception so it's safe
-	uniforms[EXTERNAL_COLOR_U] = glGetUniformLocation(program, "u_Color");
+	uniforms[TIME_U] = glGetUniformLocation(program, "u_Time"); //if a uniform is not found it won't throw an exception so it's safe
 }
 
 void Shader::createShaderProgram(const std::string& vertexShaderName, const std::string& fragmentShaderName)
@@ -43,10 +42,6 @@ void Shader::createShaderProgram(const std::string& vertexShaderName, const std:
 		glAttachShader(program, shaders[i]); //add all our shaders to the shader program "shaders" 
 	}
 
-	//Not needed as location is specified in shader itself
-	//glBindAttribLocation(program, 0, "position"); // associate attribute variable with our shader program attribute (in this case attribute vec3 position;)
-	//glBindAttribLocation(program, 1, "texCoord");
-
 	glLinkProgram(program); //create executables that will run on the GPU shaders
 	CheckShaderError(program, GL_LINK_STATUS, true, "Error: Shader program linking failed"); // cheack for error
 
@@ -55,7 +50,6 @@ void Shader::createShaderProgram(const std::string& vertexShaderName, const std:
 
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "u_Transform"); // associate with the location of uniform variable within a program
 	uniforms[TIME_U] = glGetUniformLocation(program, "u_Time");
-	uniforms[EXTERNAL_COLOR_U] = glGetUniformLocation(program, "u_Color");
 }
 
 Shader::~Shader()
@@ -68,7 +62,7 @@ Shader::~Shader()
 	glDeleteProgram(program); // delete the program
 }
 
-void Shader::Bind()
+void Shader::bind()
 {
 	glUseProgram(program); //installs the program object specified by program as part of rendering state
 }
@@ -80,7 +74,6 @@ void Shader::update(const Transform& transform, const Camera& camera)
 	static float t = 0;
 	t += 0.001f;
 	glUniform1f(uniforms[TIME_U], t);
-	glUniform4f(uniforms[EXTERNAL_COLOR_U], sinf(t) * .5f, sinf(t) * .5f, sinf(t) * .5f, sinf(t) * 1);
 }
 
 GLuint Shader::CreateShader(const std::string& text, unsigned int type)

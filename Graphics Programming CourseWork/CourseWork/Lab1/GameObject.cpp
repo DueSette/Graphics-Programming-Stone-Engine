@@ -47,9 +47,15 @@ void GameObject::Setup()
 	_transform->SetScale(glm::vec3(1, 1, 1));
 }
 
+Shader* GameObject::exposeShaderProgram()
+{
+	_shader->bind();
+	return _shader;
+}
+
 void GameObject::drawProcedure(const Camera& cam) //all the graphics-related operations in one place, camera has to be passed in from the main loop of course
 {
-	_shader->Bind();
+	//_shader->bind();
 	_shader->update(*_transform, cam);
 
 	_texture->Bind(0);

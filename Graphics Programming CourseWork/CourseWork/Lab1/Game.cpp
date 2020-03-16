@@ -275,15 +275,25 @@ void Game::renderLoop()
 	{
 		dolphins[j]->translate(glm::vec3(1 * cos(counter), 1 * sin(counter), 0) * deltaTime);
 		dolphins[j]->rotate(VECTOR_RIGHT * deltaTime);
+
+		//Shader related procedures
+		Shader& s = *dolphins[j]->exposeShaderProgram();
+		s.setFloat("u_Time", counter);
 		dolphins[j]->drawProcedure(_player.cam); //that's how we render every object in the scene
 	}
 
 	//separate loops for normal game objects and physics-enabled gameobjects
 	for (int i = 0; i < gameObjectList.size(); i++)
+	{
+		Shader& s = *gameObjectList[i]->exposeShaderProgram();
 		gameObjectList[i]->drawProcedure(_player.cam);
+	}
 
 	for (int i = 0; i < physicsGameObjectList.size(); i++)
+	{
+		Shader& s = *physicsGameObjectList[i]->exposeShaderProgram();
 		physicsGameObjectList[i]->drawProcedure(_player.cam);
+	}
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnd();
