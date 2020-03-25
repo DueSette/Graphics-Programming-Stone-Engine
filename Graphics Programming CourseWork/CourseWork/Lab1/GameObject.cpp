@@ -41,6 +41,42 @@ void GameObject::initialise(const std::string& meshName, const std::string& text
 	this->Setup();
 }
 
+void GameObject::initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& geoShader, const std::string& fragShader, glm::vec3 pos, ColliderType collType)
+{
+	_mesh->loadModel(meshName);
+	_texture = new Texture(textureName);
+	_shader->createShaderProgram(vertShader, geoShader, fragShader);
+	_transform->SetPos(pos);
+
+	switch (collType) //creates a collider based on the specified parameter
+	{
+	case ColliderType::NONE:
+		_collider = nullptr;
+		break;
+
+	case ColliderType::SPHERE:
+	{
+		glm::vec3 s = *_transform->GetScale();
+		float f = max(s.x, s.y);
+		f = max(f, s.z);
+		_collider = new SphereCollider(*_transform->GetPos(), f);
+	}
+	break;
+
+	case ColliderType::BOX:
+	{
+		glm::vec3 s = *_transform->GetScale();
+		_collider = new BoxCollider(*_transform->GetPos(), s.x, s.y, s.z);
+		break;
+	}
+
+	default:
+		print("Unknown collider type is being added", DebugMessageTier::ERROR);
+		break;
+	}
+	this->Setup();
+}
+
 //post-initialize, useful for specific methods that need to make sure everything is instanced
 void GameObject::Setup()
 {

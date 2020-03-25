@@ -10,7 +10,7 @@ void Shader::createShaderProgram()
 {
 	program = glCreateProgram(); // create shader program (openGL saves as ref number)
 	shaders[0] = CreateShader(LoadShader("..\\res\\shaders\\vertex_regular.shader"), GL_VERTEX_SHADER); // create vertex shader
-	shaders[1] = CreateShader(LoadShader("..\\res\\shaders\\fragment_vanilla.shader"), GL_FRAGMENT_SHADER); // create fragment shader
+	shaders[2] = CreateShader(LoadShader("..\\res\\shaders\\fragment_vanilla.frag"), GL_FRAGMENT_SHADER); // create fragment shader
 
 	for (unsigned int i = 0; i < NUM_SHADERS; i++)
 	{
@@ -28,14 +28,13 @@ void Shader::createShaderProgram()
 	CheckShaderError(program, GL_VALIDATE_STATUS, true, "Error: Shader program not valid");
 
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "u_Transform"); // associate with the location of uniform variable within a program
-	uniforms[TIME_U] = glGetUniformLocation(program, "u_Time"); //if a uniform is not found it won't throw an exception so it's safe
 }
 
 void Shader::createShaderProgram(const std::string& vertexShaderName, const std::string& fragmentShaderName)
 {
 	program = glCreateProgram(); // create shader program (openGL saves as ref number)
 	shaders[0] = CreateShader(LoadShader(vertexShaderName), GL_VERTEX_SHADER); // create vertex shader
-	shaders[1] = CreateShader(LoadShader(fragmentShaderName), GL_FRAGMENT_SHADER); // create fragment shader
+	shaders[2] = CreateShader(LoadShader(fragmentShaderName), GL_FRAGMENT_SHADER); // create fragment shader
 
 	for (unsigned int i = 0; i < NUM_SHADERS; i++)
 	{
@@ -49,7 +48,28 @@ void Shader::createShaderProgram(const std::string& vertexShaderName, const std:
 	CheckShaderError(program, GL_VALIDATE_STATUS, true, "Error: Shader program not valid");
 
 	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "u_Transform"); // associate with the location of uniform variable within a program
-	uniforms[TIME_U] = glGetUniformLocation(program, "u_Time");
+}
+
+void Shader::createShaderProgram(const std::string& vertexShaderName, const std::string& geometryShaderName, const std::string& fragmentShaderName)
+{
+	program = glCreateProgram(); // create shader program (openGL saves as ref number)
+	shaders[0] = CreateShader(LoadShader(vertexShaderName), GL_VERTEX_SHADER); // create vertex shader
+	shaders[1] = CreateShader(LoadShader(geometryShaderName), GL_GEOMETRY_SHADER); // create fragment shader
+	shaders[2] = CreateShader(LoadShader(fragmentShaderName), GL_FRAGMENT_SHADER); // create fragment shader
+
+	for (unsigned int i = 0; i < NUM_SHADERS; i++)
+	{
+		if(shaders[i] > 0) //might remove if it creates bugs
+			glAttachShader(program, shaders[i]); //add all our shaders to the shader program "shaders" 
+	}
+
+	glLinkProgram(program); //create executables that will run on the GPU shaders
+	CheckShaderError(program, GL_LINK_STATUS, true, "Error: Shader program linking failed"); // cheack for error
+
+	glValidateProgram(program); //check the entire program is valid
+	CheckShaderError(program, GL_VALIDATE_STATUS, true, "Error: Shader program not valid");
+
+	uniforms[TRANSFORM_U] = glGetUniformLocation(program, "u_Transform"); // associate with the location of uniform variable within a program
 }
 
 Shader::~Shader()
@@ -73,7 +93,6 @@ void Shader::update(const Transform& transform, const Camera& camera)
 	glUniformMatrix4fv(uniforms[TRANSFORM_U], 1, GLU_FALSE, &mvp[0][0]);
 	static float t = 0;
 	t += 0.001f;
-	glUniform1f(uniforms[TIME_U], t);
 }
 
 GLuint Shader::CreateShader(const std::string& text, unsigned int type)

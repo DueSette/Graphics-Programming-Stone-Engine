@@ -106,10 +106,13 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\res\shaders\fragment_vanilla.shader" />
-    <None Include="..\res\shaders\fragment_VCR.shader" />
-    <None Include="..\res\shaders\vertex_regular.shader" />
-    <None Include="..\res\shaders\vertex_scrollTexture.shader" />
+    <None Include="..\res\shaders\fragment_explosionShader.frag" />
+    <None Include="..\res\shaders\fragment_vanilla.frag" />
+    <None Include="..\res\shaders\fragment_VCR.frag" />
+    <None Include="..\res\shaders\geometry_explosionShader.geom" />
+    <None Include="..\res\shaders\vertex_explosionShader.vert" />
+    <None Include="..\res\shaders\vertex_regular.vert" />
+    <None Include="..\res\shaders\vertex_scrollTexture.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

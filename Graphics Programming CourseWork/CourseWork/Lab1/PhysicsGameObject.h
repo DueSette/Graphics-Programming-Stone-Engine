@@ -12,6 +12,7 @@ class PhysicsGameObject : public GameObject
 public:
 	PhysicsGameObject();
 	void initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& fragShader, glm::vec3 pos, ColliderType ct);
+	void initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& geoShader, const std::string& fragShader, glm::vec3 pos, ColliderType ct);
 	void initialiseRandom(glm::vec3 pos); //selects pseudorandom parameters and then calls initialise
 	
 	void onCollision();

@@ -12,6 +12,12 @@ void PhysicsGameObject::initialise(const std::string& meshName, const std::strin
 	getCollider()->parent = this;
 }
 
+void PhysicsGameObject::initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& geoShader, const std::string& fragShader, glm::vec3 pos, ColliderType ct)
+{
+	GameObject::initialise(meshName, textureName, vertShader, geoShader, fragShader, pos, ct); //calls baseclass initialiser
+	getCollider()->parent = this;
+}
+
 void PhysicsGameObject::initialiseRandom(glm::vec3 pos)
 {
 	std::string meshName, textureName, vertShader, fragShader;

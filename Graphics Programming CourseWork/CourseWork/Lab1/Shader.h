@@ -13,6 +13,7 @@ public:
 	Shader();
 	void createShaderProgram(); //creates shader program without searching for a specific shader (loads the "regular" shaders from file folder)
 	void createShaderProgram(const std::string& vertexShaderName, const std::string& fragmentShaderName); //creates shader program and searches for specific shaders
+	void createShaderProgram(const std::string& vertexShaderName, const std::string& geometryShaderName, const std::string& fragmentShaderName); //same as above but accepts geometry shader
 
 	void bind(); //Set gpu to use our shaders
 	void update(const Transform& transform, const Camera& camera); //feeds shader specific info, called each frame
@@ -54,7 +55,7 @@ public:
 		if ((glGetUniformLocation(program, name.c_str()) == -1))
 		{
 			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-			__debugbreak();
+			//__debugbreak();
 		}
 	}
 	// ------------------------------------------------------------------------
@@ -157,13 +158,11 @@ public:
 	#pragma endregion
 
 private:
-	static const unsigned int NUM_SHADERS = 2; // number of shaders (vertex and fragment)
+	static const unsigned int NUM_SHADERS = 3; // number of shaders (vertex and fragment)
 
 	enum
 	{
 		TRANSFORM_U,
-
-		TIME_U,
 
 		NUM_UNIFORMS
 	};

@@ -105,16 +105,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\res\shaders\vertex_regular.shader">
+    <None Include="..\res\shaders\geometry_explosionShader.geom">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_scrollTexture.shader">
+    <None Include="..\res\shaders\fragment_explosionShader.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_vanilla.shader">
+    <None Include="..\res\shaders\fragment_vanilla.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_VCR.shader">
+    <None Include="..\res\shaders\fragment_VCR.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_explosionShader.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_regular.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_scrollTexture.vert">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

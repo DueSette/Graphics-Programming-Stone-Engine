@@ -16,6 +16,8 @@ public:
 	GameObject();
 
 	void initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& fragShader, glm::vec3 pos, ColliderType ct);
+	void initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& geoShader, const std::string& fragShader, glm::vec3 pos, ColliderType ct);
+	
 	Shader* exposeShaderProgram();
 	void drawProcedure(const Camera& cam);
 

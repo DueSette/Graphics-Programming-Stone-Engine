@@ -18,22 +18,22 @@ void Game::init()
 {
 	_gameDisplay.initialise();
 	SDL_SetRelativeMouseMode(SDL_TRUE);					  
-	counter = 0.0f;
+	counter = 1.0f;
 
-	_map.initialise(s_kModels + "map.obj", s_kTextures + "water.jpg", s_kShaders + "vertex_regular.shader", s_kShaders + "fragment_VCR.shader", glm::vec3(0, -1, 0), ColliderType::BOX);
+	_map.initialise(s_kModels + "map.obj", s_kTextures + "water.jpg", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
 	_map._name = "Map";
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 5.0f);
 
-	_dol0.initialise(s_kModels + "dolf.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_scrollTexture.shader", s_kShaders + "fragment_VCR.shader", glm::vec3(0, 0, 15), ColliderType::NONE);
+	_dol0.initialise(s_kModels + "dolf.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_scrollTexture.vert", s_kShaders + "fragment_VCR.frag", glm::vec3(0, 0, 15), ColliderType::NONE);
 	_dol0.setRotation(glm::vec3(0, 0, 0));
 
-	_dol1.initialise(s_kModels + "dolf.obj", s_kTextures + "hypnotic.png", s_kShaders + "vertex_scrollTexture.shader", s_kShaders + "fragment_VCR.shader", glm::vec3(0, 0, 15), ColliderType::NONE);
+	_dol1.initialise(s_kModels + "dolf.obj", s_kTextures + "hypnotic.png", s_kShaders + "vertex_scrollTexture.vert", s_kShaders + "fragment_VCR.frag", glm::vec3(0, 0, 15), ColliderType::NONE);
 	_dol1.setRotation(glm::vec3(0, 90, 0));
 
-	_dol2.initialise(s_kModels + "dolf.obj", s_kTextures + "grid.png", s_kShaders + "vertex_scrollTexture.shader", s_kShaders + "fragment_VCR.shader", glm::vec3(0, 0, 15), ColliderType::NONE);
+	_dol2.initialise(s_kModels + "dolf.obj", s_kTextures + "grid.png", s_kShaders + "vertex_scrollTexture.vert", s_kShaders + "fragment_VCR.frag", glm::vec3(0, 0, 15), ColliderType::NONE);
 	_dol2.setRotation(glm::vec3(0, -90, 0));
 
 	dolphins.push_back(&_dol0);
@@ -60,7 +60,7 @@ void Game::gameLoop()
 {
 	while (_gameState != GameState::EXIT)
 	{		
-		counter += 0.01f;
+		counter += 0.02f;
 		++frames;
 
 		deltaTime = (float)updateDeltaTime();
@@ -286,12 +286,14 @@ void Game::renderLoop()
 	for (int i = 0; i < gameObjectList.size(); i++)
 	{
 		Shader& s = *gameObjectList[i]->exposeShaderProgram();
+		//s.setFloat("u_Time", 1);
 		gameObjectList[i]->drawProcedure(_player.cam);
 	}
 
 	for (int i = 0; i < physicsGameObjectList.size(); i++)
 	{
 		Shader& s = *physicsGameObjectList[i]->exposeShaderProgram();
+		s.setFloat("u_Time", counter);
 		physicsGameObjectList[i]->drawProcedure(_player.cam);
 	}
 
