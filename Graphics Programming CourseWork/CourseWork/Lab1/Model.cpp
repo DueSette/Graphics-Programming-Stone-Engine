@@ -78,6 +78,8 @@ void Mesh::initWithoutModel(Vertex* vertices, unsigned int numVertices, unsigned
 
 Texture::Texture(const std::string& fileName)
 {
+	if (fileName.empty()) { return; }
+
 	int width, height, numComponents; //width, height, and no of components of image
 	unsigned char* imageData = stbi_load((fileName).c_str(), &width, &height, &numComponents, 4); //load the image and store the data
 

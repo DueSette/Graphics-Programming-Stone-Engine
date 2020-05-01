@@ -33,7 +33,7 @@ void phongModel(vec4 pos, vec3 norm, out vec3 ambient, out vec3 diffuse, out vec
 	//CALC SPECULAR
 	vec3 viewDirection = normalize(CameraPosition - Position);
 	vec3 reflectionDirection = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDirection, reflectionDirection), 0.0), 64 * Shininess);
+	float spec = pow(max(dot(viewDirection, reflectionDirection), 0.0), 1 * Shininess);
 	specular = Ks * spec * LightColor;
 }
 

@@ -21,6 +21,8 @@ public:
 	Shader* exposeShaderProgram();
 	void drawProcedure(const Camera& cam);
 
+	void AddTextureMap(const std::string& fileName);
+
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();
 
@@ -45,7 +47,7 @@ protected:
 
 	Transform* _transform;
 	Mesh* _mesh;
-	Texture* _texture;
+	Texture* _baseMap, * _specularMap;
 	Shader* _shader;
 	Collider* _collider = nullptr;
 };

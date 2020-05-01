@@ -1,14 +1,16 @@
 #include "GameObject.h"
 
 GameObject::GameObject()
-	:_mesh(new Mesh()), _texture(nullptr), _shader(new Shader()), _transform(new Transform()), _name("")
+	:_mesh(new Mesh()), _baseMap(nullptr), _specularMap(nullptr), _shader(new Shader()), _transform(new Transform()), _name("")
 {}
 
 //General startup function that gets all the other classes and files in one place, one overload lets you select shaders and the other uses "regular" ones
 void GameObject::initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& fragShader, glm::vec3 pos, ColliderType collType = ColliderType::NONE)
 {
 	_mesh->loadModel(meshName);
-	_texture = new Texture(textureName);
+	_baseMap = new Texture(textureName);
+	//_specularMap = new Texture(specTextName);
+
 	_shader->createShaderProgram(vertShader, fragShader);
 	_transform->SetPos(pos);
 	
@@ -44,7 +46,7 @@ void GameObject::initialise(const std::string& meshName, const std::string& text
 void GameObject::initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& geoShader, const std::string& fragShader, glm::vec3 pos, ColliderType collType)
 {
 	_mesh->loadModel(meshName);
-	_texture = new Texture(textureName);
+	_baseMap = new Texture(textureName);
 	_shader->createShaderProgram(vertShader, geoShader, fragShader);
 	_transform->SetPos(pos);
 
@@ -91,11 +93,18 @@ Shader* GameObject::exposeShaderProgram()
 
 void GameObject::drawProcedure(const Camera& cam) //all the graphics-related operations in one place, camera has to be passed in from the main loop of course
 {
-	//_shader->bind();
 	_shader->update(*_transform, cam);
 
-	_texture->Bind(0);
+	_baseMap->Bind(0);
+
+	if (_specularMap != nullptr) { _specularMap->Bind(1); } //specular map is optional
+
 	_mesh->draw();	
+}
+
+void GameObject::AddTextureMap(const std::string& fileName)
+{
+	_specularMap = new Texture(fileName);
 }
 
 glm::vec3 GameObject::getPosition()

@@ -27,10 +27,12 @@ void Game::init()
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
+	_map.AddTextureMap(s_kTextures + "crate_specular.png");
 
-	_dol0.initialise(s_kModels + "monkey3.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
+	_dol0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
+	_dol0.AddTextureMap(s_kTextures + "crate_specular.png");
 
-	_dol1.initialise(s_kModels + "monkey3.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
+	_dol1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 
 	_dol2.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
 
@@ -268,20 +270,18 @@ void Game::setBlinnPhongShader(GameObject& g)
 {
 	Shader& s = *g.exposeShaderProgram();
 
-	glm::mat4 modelView = g.getModel(); // *myCamera.GetView();
-	s.setMat4("ModelMatrix", modelView);
-
-	s.setVec4("LightPosition", glm::vec4(15, 5, 0, 1.0));
-	s.setVec3("LightColor", glm::vec3(0.2, 0.2, 0.2));
+	glm::mat4 modelMatrix = g.getModel(); // *myCamera.GetView();
+	s.setMat4("ModelMatrix", modelMatrix);
 	s.setVec3("CameraPosition", _camera.getPosition());
 
-	//s.setFloat("Intensity", 0.15f);
+	s.setVec4("light.pos", glm::vec4(2, 5, 0, 1.0));
+	s.setVec3("light.ambient", glm::vec3(0.1, 0.1, 0.1));
+	s.setVec3("light.diffuse", glm::vec3(0.1, 0.1, 0.1));
+	s.setVec3("light.specular", glm::vec3(0.7, 0.7, 0.7));
 
-	s.setVec3("Ka", glm::vec3(0.2, 0.2, 0.2));
-	s.setVec3("Kd", glm::vec3(0.8, 0.8, 0.5));
-	s.setVec3("Ks", glm::vec3(1, 1, 1));
-
-	s.setFloat("Shininess", 1.0);
+	s.setInt("mat.diffuse", 0);
+	s.setInt("mat.specular", 1);
+	s.setFloat("mat.shininess", 256.0);
 
 	g.drawProcedure(_player.cam);
 }
