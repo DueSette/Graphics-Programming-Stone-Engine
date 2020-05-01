@@ -27,14 +27,13 @@ void Game::init()
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
-	_map.AddTextureMap(s_kTextures + "crate_specular.png");
 
 	_dol0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
 	_dol0.AddTextureMap(s_kTextures + "crate_specular.png");
 
 	_dol1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 
-	_dol2.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
+	_dol2.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 
 	gameObjectList.push_back(&_dol0);
 	gameObjectList.push_back(&_dol1);
@@ -274,14 +273,14 @@ void Game::setBlinnPhongShader(GameObject& g)
 	s.setMat4("ModelMatrix", modelMatrix);
 	s.setVec3("CameraPosition", _camera.getPosition());
 
-	s.setVec4("light.pos", glm::vec4(2, 5, 0, 1.0));
-	s.setVec3("light.ambient", glm::vec3(0.1, 0.1, 0.1));
-	s.setVec3("light.diffuse", glm::vec3(0.1, 0.1, 0.1));
-	s.setVec3("light.specular", glm::vec3(0.7, 0.7, 0.7));
+	s.setVec4("light.pos", glm::vec4(2, 5, 9, 1.0));
+	s.setVec3("light.ambient", glm::vec3(0.25, 0.25, 0.25));
+	s.setVec3("light.diffuse", glm::vec3(0.33, 0.33, 0.33));
+	s.setVec3("light.specular", glm::vec3(1, 1, 1));
 
 	s.setInt("mat.diffuse", 0);
 	s.setInt("mat.specular", 1);
-	s.setFloat("mat.shininess", 256.0);
+	s.setFloat("mat.shininess", 32.0);
 
 	g.drawProcedure(_player.cam);
 }
