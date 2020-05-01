@@ -20,25 +20,23 @@ void Game::init()
 	SDL_SetRelativeMouseMode(SDL_TRUE);					  
 	counter = 1.0f;
 
-	_map.initialise(s_kModels + "map.obj", s_kTextures + "water.jpg", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
+	//_map.initialise(s_kModels + "map.obj", s_kTextures + "water.jpg", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
+	_map.initialise(s_kModels + "map.obj", s_kTextures + "bricks.jpg", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
 	_map._name = "Map";
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
-	_map.setPosition(-VECTOR_UP * 5.0f);
+	_map.setPosition(-VECTOR_UP * 3.0f);
 
-	_dol0.initialise(s_kModels + "dolf.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_scrollTexture.vert", s_kShaders + "fragment_VCR.frag", glm::vec3(0, 0, 15), ColliderType::NONE);
-	_dol0.setRotation(glm::vec3(0, 0, 0));
+	_dol0.initialise(s_kModels + "monkey3.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
 
-	_dol1.initialise(s_kModels + "dolf.obj", s_kTextures + "hypnotic.png", s_kShaders + "vertex_scrollTexture.vert", s_kShaders + "fragment_VCR.frag", glm::vec3(0, 0, 15), ColliderType::NONE);
-	_dol1.setRotation(glm::vec3(0, 90, 0));
+	_dol1.initialise(s_kModels + "monkey3.obj", s_kTextures + "pearly.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 
-	_dol2.initialise(s_kModels + "dolf.obj", s_kTextures + "grid.png", s_kShaders + "vertex_scrollTexture.vert", s_kShaders + "fragment_VCR.frag", glm::vec3(0, 0, 15), ColliderType::NONE);
-	_dol2.setRotation(glm::vec3(0, -90, 0));
+	_dol2.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
 
-	dolphins.push_back(&_dol0);
-	dolphins.push_back(&_dol1);
-	dolphins.push_back(&_dol2);
+	gameObjectList.push_back(&_dol0);
+	gameObjectList.push_back(&_dol1);
+	gameObjectList.push_back(&_dol2);
 	physicsGameObjectList.push_back(&_map);
 
 	//SOUND
@@ -266,27 +264,44 @@ void Game::physicsLoop()
 	}
 }
 
+void Game::setBlinnPhongShader(GameObject& g)
+{
+	Shader& s = *g.exposeShaderProgram();
+
+	glm::mat4 modelView = g.getModel(); // *myCamera.GetView();
+	s.setMat4("ModelMatrix", modelView);
+
+	s.setVec4("LightPosition", glm::vec4(15, 5, 0, 1.0));
+	s.setVec3("LightColor", glm::vec3(0.2, 0.2, 0.2));
+	s.setVec3("CameraPosition", _camera.getPosition());
+
+	//s.setFloat("Intensity", 0.15f);
+
+	s.setVec3("Ka", glm::vec3(0.2, 0.2, 0.2));
+	s.setVec3("Kd", glm::vec3(0.8, 0.8, 0.5));
+	s.setVec3("Ks", glm::vec3(1, 1, 1));
+
+	s.setFloat("Shininess", 1.0);
+
+	g.drawProcedure(_player.cam);
+}
+
 void Game::renderLoop()
 {
-	_gameDisplay.clearDisplay(cos(counter) / 2 + 0.55f, -cos(counter) / 4 + 0.25f, 0.4f, 1);
+	_gameDisplay.clearDisplay(0, 0, 0, 0);
 
-	//render dolphins separately (in a non-demo project this would be avoided at all costs)
-	for (int j = 0; j < dolphins.size(); j++)
-	{
-		dolphins[j]->translate(glm::vec3(1 * cos(counter), 1 * sin(counter), 0) * deltaTime);
-		dolphins[j]->rotate(VECTOR_RIGHT * deltaTime);
+	setBlinnPhongShader(_map);
+	setBlinnPhongShader(_dol0);
+	setBlinnPhongShader(_dol1);	
 
-		//Shader related procedures
-		Shader& s = *dolphins[j]->exposeShaderProgram();
-		s.setFloat("u_Time", counter);
-		dolphins[j]->drawProcedure(_player.cam); //that's how we render every object in the scene
-	}
+	_dol0.rotate(VECTOR_UP * 0.0005f);
+	_dol1.rotate(VECTOR_UP * 0.0005f);
 
 	//separate loops for normal game objects and physics-enabled gameobjects
 	for (int i = 0; i < gameObjectList.size(); i++)
 	{
 		Shader& s = *gameObjectList[i]->exposeShaderProgram();
-		//s.setFloat("u_Time", 1);
+		s.setFloat("u_Time", counter);
 		gameObjectList[i]->drawProcedure(_player.cam);
 	}
 
@@ -300,15 +315,6 @@ void Game::renderLoop()
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnd();
 	_gameDisplay.swapBuffer();
-}
-
-//LEGACY
-bool Game::checkCollisions(glm::vec3 pos1, float rad1, glm::vec3 pos2, float rad2)
-{
-	float distance = (pos2.x - pos1.x) * (pos2.x - pos1.x) + (pos2.y - pos1.y) * (pos2.y - pos1.y) + (pos2.z - pos1.z) * (pos2.z - pos1.z);
-	distance = SDL_sqrt(distance);
-
-	return distance > rad1 + rad2 ? false : true;
 }
 
 //NEW COLLISION METHOD

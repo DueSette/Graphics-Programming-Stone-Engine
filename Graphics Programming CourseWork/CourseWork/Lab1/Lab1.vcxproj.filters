@@ -126,5 +126,17 @@
     <None Include="..\res\shaders\vertex_scrollTexture.vert">
       <Filter>Resources</Filter>
     </None>
+    <None Include="..\res\shaders\vertex_blinn_phong.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_phong.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\fragment_blinn_phong.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\fragment_phong.frag">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
 </Project>

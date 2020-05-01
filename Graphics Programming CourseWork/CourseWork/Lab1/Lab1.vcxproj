@@ -106,11 +106,15 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\res\shaders\fragment_blinn_phong.frag" />
     <None Include="..\res\shaders\fragment_explosionShader.frag" />
+    <None Include="..\res\shaders\fragment_phong.frag" />
     <None Include="..\res\shaders\fragment_vanilla.frag" />
     <None Include="..\res\shaders\fragment_VCR.frag" />
     <None Include="..\res\shaders\geometry_explosionShader.geom" />
+    <None Include="..\res\shaders\vertex_blinn_phong.vert" />
     <None Include="..\res\shaders\vertex_explosionShader.vert" />
+    <None Include="..\res\shaders\vertex_phong.vert" />
     <None Include="..\res\shaders\vertex_regular.vert" />
     <None Include="..\res\shaders\vertex_scrollTexture.vert" />
   </ItemGroup>

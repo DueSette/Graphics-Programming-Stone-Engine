@@ -17,7 +17,7 @@ public:
 	{		
 	}
 
-	inline glm::mat4 GetModel() const
+	inline glm::mat4 GetModel() const //returns model matrix, that is the matrix that results from position, rotation and scale
 	{
 		glm::mat4 posMat = glm::translate(pos);
 		glm::mat4 scaleMat = glm::scale(scale);

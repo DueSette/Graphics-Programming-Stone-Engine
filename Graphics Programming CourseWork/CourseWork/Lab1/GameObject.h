@@ -35,6 +35,8 @@ public:
 
 	bool addCollider(ColliderType t);
 	Collider* getCollider();
+	
+	glm::mat4 getModel();
 
 	std::string _name;
 

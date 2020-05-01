@@ -38,8 +38,9 @@ private:
 	void physicsLoop();
 	void renderLoop();
 
-	//legacy
-	bool checkCollisions(glm::vec3 pos1, float rad1, glm::vec3 pos2, float rad2);
+	//shader methods
+	void setBlinnPhongShader(GameObject& g);
+
 	//collider-agnostic collision algorithm
 	static bool checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2);
 

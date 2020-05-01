@@ -87,7 +87,7 @@ public:
 		if ((glGetUniformLocation(program, name.c_str()) == -1))
 		{
 			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-			__debugbreak();
+			//__debugbreak();
 		}
 	}
 	void setVec3(const std::string& name, float x, float y, float z) const
@@ -97,7 +97,7 @@ public:
 		if ((glGetUniformLocation(program, name.c_str()) == -1))
 		{
 			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-			__debugbreak();
+			//__debugbreak();
 		}
 	}
 	// ------------------------------------------------------------------------
@@ -108,7 +108,7 @@ public:
 		if ((glGetUniformLocation(program, name.c_str()) == -1))
 		{
 			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-			__debugbreak();
+			//__debugbreak();
 		}
 	}
 	void setVec4(const std::string& name, float x, float y, float z, float w)
@@ -118,7 +118,7 @@ public:
 		if ((glGetUniformLocation(program, name.c_str()) == -1))
 		{
 			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-			__debugbreak();
+			//__debugbreak();
 		}
 	}
 	// ------------------------------------------------------------------------
@@ -151,7 +151,7 @@ public:
 		if ((glGetUniformLocation(program, name.c_str()) == -1))
 		{
 			std::cerr << "Unable to load shader: " << name.c_str() << std::endl;
-			__debugbreak();
+			//__debugbreak();
 		}
 	}
 

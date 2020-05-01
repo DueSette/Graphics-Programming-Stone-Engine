@@ -14,6 +14,7 @@ void Mesh::draw()
 {
 	glBindVertexArray(vertexArrayObject); //binds vao and draws elements in it
 	glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_INT, 0);
+
 	glBindVertexArray(0); //unbinds vao
 }
 

@@ -168,3 +168,8 @@ Collider* GameObject::getCollider()
 {
 	return _collider;
 }
+
+glm::mat4 GameObject::getModel()
+{
+	return _transform->GetModel();
+}
