@@ -102,7 +102,7 @@ void GameObject::drawProcedure(const Camera& cam) //all the graphics-related ope
 	_mesh->draw();	
 }
 
-void GameObject::AddTextureMap(const std::string& fileName)
+void GameObject::AddTextureMap(const std::string& fileName) //used to add an additional texture on top of the basemap (normal, specular, emission)
 {
 	_specularMap = new Texture(fileName);
 }

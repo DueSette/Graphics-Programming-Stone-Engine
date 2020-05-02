@@ -5,13 +5,7 @@ in vec2 TexCoord;
 
 layout( location = 0 ) out vec4 FragColor;
 
-uniform sampler2D texSampler;
-
-//uniform vec4 LightPosition; // Light position in eye coords.
-//uniform vec3 LightColor;
 uniform vec3 CameraPosition;
-
-//uniform vec3 Intensity;
 
 struct Light //The light that is interacting with this object
 {
@@ -20,6 +14,10 @@ struct Light //The light that is interacting with this object
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+
+	float constantFall;
+	float linearFall;
+	float quadraticFall;
 };
 
 struct Material //The material this object is made of
@@ -35,7 +33,9 @@ uniform Material mat;
 
 void phongModel(vec4 pos, vec3 norm, out vec3 ambient, out vec3 diffuse, out vec3 specular )
 {
-	vec3 texelColor = vec3(texture(mat.diffuse, TexCoord)); //samples texture color in given fragment, used for ambient and diffuse maps
+	vec3 texelColor = vec3(texture(mat.diffuse, TexCoord)); //samples texture color in given fragment, used diffuse (and ambient) maps
+	float distanceFromLight = length(light.pos.xyz - Position);
+	float lightAttenuation = 1.0 / (light.constantFall + light.linearFall * distanceFromLight + light.quadraticFall * (distanceFromLight * distanceFromLight));
 
 	//CALC AMBIENT
 	ambient = texelColor * light.ambient;
@@ -53,6 +53,11 @@ void phongModel(vec4 pos, vec3 norm, out vec3 ambient, out vec3 diffuse, out vec
 	float specularFactor = pow(max(dot(vertexNormal, halfwayVector), 0.0), 1 * mat.shininess);
 	
 	specular = light.specular * specularFactor * vec3(texture(mat.specular, TexCoord));
+
+	//Apply attenuation
+	ambient *= lightAttenuation;
+	diffuse *= lightAttenuation;
+	specular *= lightAttenuation;
 }
 
 void main()

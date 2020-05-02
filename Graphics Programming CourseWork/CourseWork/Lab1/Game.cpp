@@ -273,10 +273,14 @@ void Game::setBlinnPhongShader(GameObject& g)
 	s.setMat4("ModelMatrix", modelMatrix);
 	s.setVec3("CameraPosition", _camera.getPosition());
 
-	s.setVec4("light.pos", glm::vec4(2, 5, 9, 1.0));
-	s.setVec3("light.ambient", glm::vec3(0.25, 0.25, 0.25));
-	s.setVec3("light.diffuse", glm::vec3(0.33, 0.33, 0.33));
+	s.setVec4("light.pos", glm::vec4(2, 5 + (sinf(counter) * 6), 9, 1.0));
+	s.setVec3("light.ambient", glm::vec3(0.35, 0.35, 0.35));
+	s.setVec3("light.diffuse", glm::vec3(0.5, 0.5, 0.5));
 	s.setVec3("light.specular", glm::vec3(1, 1, 1));
+
+	s.setFloat("light.constantFall", 1.0f);
+	s.setFloat("light.linearFall", 0.09f);
+	s.setFloat("light.quadraticFall", 0.032f);
 
 	s.setInt("mat.diffuse", 0);
 	s.setInt("mat.specular", 1);
@@ -293,8 +297,8 @@ void Game::renderLoop()
 	setBlinnPhongShader(_dol0);
 	setBlinnPhongShader(_dol1);	
 
-	_dol0.rotate(VECTOR_UP * 0.0005f);
-	_dol1.rotate(VECTOR_UP * 0.0005f);
+	_dol0.rotate(VECTOR_UP * 0.006f);
+	_dol1.rotate(VECTOR_RIGHT * 0.005f);
 
 	//separate loops for normal game objects and physics-enabled gameobjects
 	for (int i = 0; i < gameObjectList.size(); i++)

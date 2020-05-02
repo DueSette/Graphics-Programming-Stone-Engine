@@ -8,6 +8,7 @@
 /*
 	The point of this class is to make every element more manageable
 	It handles meshes, textures, shaders, colliders and their components
+	Comments are available in the .cpp file
 */
 
 class GameObject
