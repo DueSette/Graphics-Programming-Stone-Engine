@@ -14,6 +14,13 @@
 
 #define GRAVITY glm::vec3(0.0f, -9.81f, 0.0f)
 
+#define COLOR_RED glm::vec3(1.0f, 0.0f, 0.0f);
+#define COLOR_GREEN glm::vec3(0.0f, 1.0f, 0.0f);
+#define COLOR_BLUE glm::vec3(0.0f, 0.0f, 1.0f);
+#define COLOR_WHITE glm::vec3(1.0f, 1.0f, 1.0f);
+#define COLOR_PURPLE glm::vec3(0.6f, 0.2f, 0.39f);
+#define COLOR_CYAN glm::vec3(0.0f, 0.58f, 0.6f);
+
 //========Useful constants to shorten filepaths and make them less error prone========
 static const std::string s_kModels = "..\\res\\models\\";
 static const std::string s_kTextures = "..\\res\\textures\\";

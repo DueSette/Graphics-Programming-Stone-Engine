@@ -20,25 +20,28 @@ void Game::init()
 	SDL_SetRelativeMouseMode(SDL_TRUE);					  
 	counter = 1.0f;
 
-	//_map.initialise(s_kModels + "map.obj", s_kTextures + "water.jpg", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.initialise(s_kModels + "map.obj", s_kTextures + "bricks.jpg", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
-	_map._name = "Map";
+
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
 
-	_dol0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
-	_dol0.AddTextureMap(s_kTextures + "crate_specular.png");
+	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
+	_box0.AddTextureMap(s_kTextures + "crate_specular.png");
 
-	_dol1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
+	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 
-	_dol2.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
+	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 
-	gameObjectList.push_back(&_dol0);
-	gameObjectList.push_back(&_dol1);
-	gameObjectList.push_back(&_dol2);
+	gameObjectList.push_back(&_box0);
+	gameObjectList.push_back(&_box1);
+	gameObjectList.push_back(&_explodingMonkey);
 	physicsGameObjectList.push_back(&_map);
+
+	_map.setMaterial(0.1f, 32);
+	_box0.setMaterial(0.1f, 256);
+	_box1.setMaterial(0.4f, 256);
 
 	//SOUND
 	objectSpawnSound = audioManager.loadSound("..\\res\\audio\\dolphin.wav");
@@ -267,26 +270,51 @@ void Game::physicsLoop()
 
 void Game::setBlinnPhongShader(GameObject& g)
 {
+	static int lightNum = 0;
+
 	Shader& s = *g.exposeShaderProgram();
 
 	glm::mat4 modelMatrix = g.getModel(); // *myCamera.GetView();
 	s.setMat4("ModelMatrix", modelMatrix);
 	s.setVec3("CameraPosition", _camera.getPosition());
 
-	s.setVec4("light.pos", glm::vec4(2, 5 + (sinf(counter) * 6), 9, 1.0));
-	s.setVec3("light.ambient", glm::vec3(0.35, 0.35, 0.35));
-	s.setVec3("light.diffuse", glm::vec3(0.5, 0.5, 0.5));
-	s.setVec3("light.specular", glm::vec3(1, 1, 1));
+	//TODO put all of this info in some form of "light loop" where every light tells every object's shader of its presence
+	s.setVec4("dirLight.direction", glm::vec4(0.2, -1.0, 4.0, 0.0));
+	s.setVec3("dirLight.color", glm::vec3(1.0f, 1.0f, 1.0f));
 
-	s.setFloat("light.constantFall", 1.0f);
-	s.setFloat("light.linearFall", 0.09f);
-	s.setFloat("light.quadraticFall", 0.032f);
+	s.setVec4("lights[" + std::to_string(lightNum) + "].pos", glm::vec4(2, 5 + (sinf(counter) * 6), 9, 1.0));
+	s.setVec3("lights[" + std::to_string(lightNum) + "].color", glm::vec3(1, 1, 1));
 
-	s.setInt("mat.diffuse", 0);
-	s.setInt("mat.specular", 1);
-	s.setFloat("mat.shininess", 32.0);
+	s.setFloat("lights[" + std::to_string(lightNum) + "].constantFall", 1.0f);
+	s.setFloat("lights[" + std::to_string(lightNum) + "].linearFall", 0.09f);
+	s.setFloat("lights[" + std::to_string(lightNum) + "].quadraticFall", 0.032f);
 
 	g.drawProcedure(_player.cam);
+}
+
+void Game::updateLitShaders(Shader* s)
+{
+	//for every light
+			//put light info inside object's shader
+}
+
+void Game::updateObjectMaterials() //updates shader with relevant material information
+{
+	for (GameObject* g : gameObjectList)
+	{
+		if (!g->hasMaterial()) { continue; } //if the object has no material it means it probably isn't lit
+
+		Shader* s = g->exposeShaderProgram();
+		g->updateShaderWithMaterial(s);
+	}
+
+	for (PhysicsGameObject* g : physicsGameObjectList)
+	{
+		if (!g->hasMaterial()) { continue; }
+
+		Shader* s = g->exposeShaderProgram();
+		g->updateShaderWithMaterial(s);
+	}
 }
 
 void Game::renderLoop()
@@ -294,17 +322,22 @@ void Game::renderLoop()
 	_gameDisplay.clearDisplay(0, 0, 0, 0);
 
 	setBlinnPhongShader(_map);
-	setBlinnPhongShader(_dol0);
-	setBlinnPhongShader(_dol1);	
+	setBlinnPhongShader(_box0);
+	setBlinnPhongShader(_box1);	
 
-	_dol0.rotate(VECTOR_UP * 0.006f);
-	_dol1.rotate(VECTOR_RIGHT * 0.005f);
+	_box0.rotate(VECTOR_UP * 0.006f);
+	//_box1.rotate(VECTOR_RIGHT * 0.005f);
 
 	//separate loops for normal game objects and physics-enabled gameobjects
+
+	updateObjectMaterials();
+
 	for (int i = 0; i < gameObjectList.size(); i++)
 	{
-		Shader& s = *gameObjectList[i]->exposeShaderProgram();
-		s.setFloat("u_Time", counter);
+		Shader* s = gameObjectList[i]->exposeShaderProgram();
+		updateLitShaders(s);
+
+		s->setFloat("u_Time", counter);
 		gameObjectList[i]->drawProcedure(_player.cam);
 	}
 
@@ -316,6 +349,7 @@ void Game::renderLoop()
 	}
 
 	glEnableClientState(GL_COLOR_ARRAY);
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnd();
 	_gameDisplay.swapBuffer();
 }

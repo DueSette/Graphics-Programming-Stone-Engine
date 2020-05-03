@@ -132,6 +132,26 @@ void GameObject::setScale(glm::vec3 scale)
 	_transform->SetScale(scale);
 }
 
+void GameObject::setMaterial(float ambient, float shininess)
+{
+	mat = new Material();
+	mat->ambient = ambient;
+	mat->shininess = shininess;
+}
+
+void GameObject::updateShaderWithMaterial(Shader* s)
+{
+	s->setInt("mat.diffuse", 0);
+	s->setInt("mat.specular", 1);
+	s->setFloat("mat.shininess", mat->shininess);
+	s->setFloat("mat.ambient", mat->ambient);
+}
+
+bool GameObject::hasMaterial()
+{
+	return mat != nullptr;
+}
+
 void GameObject::setColliderSize(float x, float y, float z)
 {
 	if (_collider == nullptr) { return; } //usual guard clause

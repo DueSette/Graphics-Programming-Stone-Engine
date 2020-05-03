@@ -76,6 +76,7 @@
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="LightCasterObject.cpp" />
     <ClCompile Include="PhysicsGameObject.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -92,6 +93,7 @@
     <ClInclude Include="Audio.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="LightCasterObject.h" />
     <ClInclude Include="PhysicsGameObject.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="Game.h" />

@@ -11,6 +11,12 @@
 	Comments are available in the .cpp file
 */
 
+typedef struct Material
+{
+	int diffuse, emission, normal; //texture refs
+	float ambient, shininess;
+};
+
 class GameObject
 {
 public:
@@ -30,6 +36,10 @@ public:
 	void setPosition(glm::vec3 pos);
 	void setRotation(glm::vec3 rot);	
 	void setScale(glm::vec3 scale);
+
+	void setMaterial(float ambient, float shininess);
+	void updateShaderWithMaterial(Shader* s);
+	bool hasMaterial();
 
 	void setColliderSize(float x, float y, float z);
 
@@ -51,4 +61,5 @@ protected:
 	Texture* _baseMap, * _specularMap;
 	Shader* _shader;
 	Collider* _collider = nullptr;
+	Material* mat = nullptr;
 };

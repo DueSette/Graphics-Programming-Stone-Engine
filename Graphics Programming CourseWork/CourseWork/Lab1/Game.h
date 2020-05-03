@@ -14,6 +14,7 @@
 #include "Shader.h"
 #include "Transform.h"
 #include "PhysicsGameObject.h"
+#include "LightCasterObject.h"
 #include "Audio.h"
 #include "Player.h"
 #include "AudioManager.h"
@@ -39,7 +40,9 @@ private:
 	void renderLoop();
 
 	//shader methods
+	void updateObjectMaterials();
 	void setBlinnPhongShader(GameObject& g);
+	void updateLitShaders(Shader* s);
 
 	//collider-agnostic collision algorithm
 	static bool checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2);
@@ -51,13 +54,13 @@ private:
 
 	std::vector<GameObject*> gameObjectList;
 	std::vector<PhysicsGameObject*> physicsGameObjectList;
-	std::vector<GameObject*> dolphins; //since they move in a specific way we put them in a separate list
+	std::vector<LightCasterObject*> lightCastersList;
 
 	PhysicsGameObject _map;
 
-	GameObject _dol0;
-	GameObject _dol1;
-	GameObject _dol2;
+	GameObject _box0;
+	GameObject _box1;
+	GameObject _explodingMonkey;
 
 	//Sound clips
 	unsigned int objectSpawnSound;
