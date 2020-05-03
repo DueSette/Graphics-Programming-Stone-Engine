@@ -20,6 +20,21 @@ void Game::init()
 	SDL_SetRelativeMouseMode(SDL_TRUE);					  
 	counter = 1.0f;
 
+	_player.cam.initialiseCamera
+	(
+		vec3(0.0f, 2.0f, -10.0f),
+		70.0f,
+		(float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height,
+		0.01f,
+		1000.0f
+	);
+
+	setupStartingScene();
+}
+
+void Game::setupStartingScene()
+{
+	//MAP, SCENE MEMBERS
 	_map.initialise(s_kModels + "map.obj", s_kTextures + "bricks.jpg", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
 
@@ -33,12 +48,27 @@ void Game::init()
 	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
+	
+	//LIGHTBULBS
+	_pointLight0.initialiseLightObject(glm::vec3(-4, 3, -5));
+	_pointLight0.setLightProperties(PointLightRange::SMALL, COLOR_BLUE);
 
+	_pointLight1.initialiseLightObject(glm::vec3(10, 10, 10));
+	_pointLight1.setLightProperties(PointLightRange::MEDIUM, VECTOR_ZERO);
+
+	_pointLight2.initialiseLightObject(glm::vec3(4, 3, 5));
+	_pointLight2.setLightProperties(PointLightRange::SMALL, COLOR_GREEN);
+
+	//VECTOR POPULATION
+	physicsGameObjectList.push_back(&_map);
 	gameObjectList.push_back(&_box0);
 	gameObjectList.push_back(&_box1);
-	gameObjectList.push_back(&_explodingMonkey);
-	physicsGameObjectList.push_back(&_map);
 
+	lightCastersList.push_back(&_pointLight0);
+	lightCastersList.push_back(&_pointLight1);
+	lightCastersList.push_back(&_pointLight2);
+
+	//MATERIAL SETTINGS
 	_map.setMaterial(0.1f, 32);
 	_box0.setMaterial(0.1f, 256);
 	_box1.setMaterial(0.4f, 256);
@@ -47,15 +77,6 @@ void Game::init()
 	objectSpawnSound = audioManager.loadSound("..\\res\\audio\\dolphin.wav");
 	backGroundMusic = audioManager.loadSound("..\\res\\audio\\vapor.wav");
 	audioManager.setlistener(VECTOR_ZERO, VECTOR_FORWARD);
-	
-	_player.cam.initialiseCamera
-	(
-		vec3(0.0f, 2.0f, -10.0f),
-		70.0f,
-		(float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height,
-		0.01f,
-		1000.0f
-	);
 }
 
 void Game::gameLoop()
@@ -268,52 +289,13 @@ void Game::physicsLoop()
 	}
 }
 
-void Game::setBlinnPhongShader(GameObject& g)
+void Game::retrieveLightData(Shader* s) //updates all the lit shaders with each light's data
 {
-	static int lightNum = 0;
-
-	Shader& s = *g.exposeShaderProgram();
-
-	glm::mat4 modelMatrix = g.getModel(); // *myCamera.GetView();
-	s.setMat4("ModelMatrix", modelMatrix);
-	s.setVec3("CameraPosition", _camera.getPosition());
-
-	//TODO put all of this info in some form of "light loop" where every light tells every object's shader of its presence
-	s.setVec4("dirLight.direction", glm::vec4(0.2, -1.0, 4.0, 0.0));
-	s.setVec3("dirLight.color", glm::vec3(1.0f, 1.0f, 1.0f));
-
-	s.setVec4("lights[" + std::to_string(lightNum) + "].pos", glm::vec4(2, 5 + (sinf(counter) * 6), 9, 1.0));
-	s.setVec3("lights[" + std::to_string(lightNum) + "].color", glm::vec3(1, 1, 1));
-
-	s.setFloat("lights[" + std::to_string(lightNum) + "].constantFall", 1.0f);
-	s.setFloat("lights[" + std::to_string(lightNum) + "].linearFall", 0.09f);
-	s.setFloat("lights[" + std::to_string(lightNum) + "].quadraticFall", 0.032f);
-
-	g.drawProcedure(_player.cam);
-}
-
-void Game::updateLitShaders(Shader* s)
-{
-	//for every light
-			//put light info inside object's shader
-}
-
-void Game::updateObjectMaterials() //updates shader with relevant material information
-{
-	for (GameObject* g : gameObjectList)
+	int x = 0;
+	for (LightCasterObject* light : lightCastersList)
 	{
-		if (!g->hasMaterial()) { continue; } //if the object has no material it means it probably isn't lit
-
-		Shader* s = g->exposeShaderProgram();
-		g->updateShaderWithMaterial(s);
-	}
-
-	for (PhysicsGameObject* g : physicsGameObjectList)
-	{
-		if (!g->hasMaterial()) { continue; }
-
-		Shader* s = g->exposeShaderProgram();
-		g->updateShaderWithMaterial(s);
+		light->updateShadersWithLight(s, std::to_string(x));
+		x++;
 	}
 }
 
@@ -321,32 +303,52 @@ void Game::renderLoop()
 {
 	_gameDisplay.clearDisplay(0, 0, 0, 0);
 
-	setBlinnPhongShader(_map);
-	setBlinnPhongShader(_box0);
-	setBlinnPhongShader(_box1);	
-
 	_box0.rotate(VECTOR_UP * 0.006f);
 	//_box1.rotate(VECTOR_RIGHT * 0.005f);
 
 	//separate loops for normal game objects and physics-enabled gameobjects
 
-	updateObjectMaterials();
-
-	for (int i = 0; i < gameObjectList.size(); i++)
+	for (GameObject* g : gameObjectList)
 	{
-		Shader* s = gameObjectList[i]->exposeShaderProgram();
-		updateLitShaders(s);
+		Shader* s = g->exposeShaderProgram();
+		if (!g->hasMaterial()) { continue; } //if the object has no material it means it probably isn't lit
 
-		s->setFloat("u_Time", counter);
-		gameObjectList[i]->drawProcedure(_player.cam);
+		g->updateShaderWithMaterial(s); //puts material data into lit shader
+
+		glm::mat4 modelMatrix = g->getModel();
+		s->setMat4("ModelMatrix", modelMatrix);
+		s->setVec3("CameraPosition", _camera.getPosition());
+
+		retrieveLightData(s); //puts lights data into lit shader
+
+		g->drawProcedure(_player.cam);
 	}
 
-	for (int i = 0; i < physicsGameObjectList.size(); i++)
+	for (PhysicsGameObject* g : physicsGameObjectList)
 	{
-		Shader& s = *physicsGameObjectList[i]->exposeShaderProgram();
-		s.setFloat("u_Time", counter);
-		physicsGameObjectList[i]->drawProcedure(_player.cam);
+		Shader* s = g->exposeShaderProgram();
+		if (!g->hasMaterial()) { continue; }
+
+		g->updateShaderWithMaterial(s);
+
+		glm::mat4 modelMatrix = g->getModel();
+		s->setMat4("ModelMatrix", modelMatrix);
+		s->setVec3("CameraPosition", _camera.getPosition());
+
+		retrieveLightData(s);
+
+		g->drawProcedure(_player.cam);
 	}
+
+	for (LightCasterObject* l : lightCastersList)
+	{
+		l->exposeShaderProgram();
+		l->drawProcedure(_player.cam);
+	}
+
+	Shader* s = _explodingMonkey.exposeShaderProgram();
+	s->setFloat("u_Time", counter);
+	_explodingMonkey.drawProcedure(_player.cam);
 
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnable(GL_FRAMEBUFFER_SRGB);

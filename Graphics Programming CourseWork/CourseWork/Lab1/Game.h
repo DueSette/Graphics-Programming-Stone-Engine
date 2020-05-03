@@ -39,10 +39,10 @@ private:
 	void physicsLoop();
 	void renderLoop();
 
+	void setupStartingScene();
+
 	//shader methods
-	void updateObjectMaterials();
-	void setBlinnPhongShader(GameObject& g);
-	void updateLitShaders(Shader* s);
+	void retrieveLightData(Shader* s);
 
 	//collider-agnostic collision algorithm
 	static bool checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2);
@@ -58,9 +58,9 @@ private:
 
 	PhysicsGameObject _map;
 
-	GameObject _box0;
-	GameObject _box1;
-	GameObject _explodingMonkey;
+	GameObject _box0, _box1, _explodingMonkey;
+
+	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
 
 	//Sound clips
 	unsigned int objectSpawnSound;

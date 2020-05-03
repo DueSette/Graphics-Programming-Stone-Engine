@@ -3,15 +3,15 @@
 #include "AudioManager.h"
 #include "Utilities.h"
 
-typedef enum PointLightRange{ SMALL, MEDIUM, LARGE };
+enum PointLightRange{ SMALL, MEDIUM, LARGE };
 
 //===========CLASS SUMMARY
 //this class is used for game objects that contain light bulbs
 class LightCasterObject : public GameObject
 {
 public:
-	void initialiseLightObject();
-	void updateShadersWithLight();
+	void initialiseLightObject(glm::vec3 pos);
+	void updateShadersWithLight(Shader* s, std::string lightNum);
 
 	void setLightProperties(PointLightRange radius, glm::vec3 color);
 
@@ -19,5 +19,4 @@ private:
 	glm::vec3 color;
 	PointLightRange type;
 	float linearFalloff, quadraticfallOff;
-
 };

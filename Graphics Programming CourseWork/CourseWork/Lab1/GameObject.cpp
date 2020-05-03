@@ -9,7 +9,6 @@ void GameObject::initialise(const std::string& meshName, const std::string& text
 {
 	_mesh->loadModel(meshName);
 	_baseMap = new Texture(textureName);
-	//_specularMap = new Texture(specTextName);
 
 	_shader->createShaderProgram(vertShader, fragShader);
 	_transform->SetPos(pos);
@@ -149,7 +148,9 @@ void GameObject::updateShaderWithMaterial(Shader* s)
 
 bool GameObject::hasMaterial()
 {
-	return mat != nullptr;
+	bool result = mat != nullptr;
+	if (!result) { print("Game object has no material!!", DebugMessageTier::WARNING); }
+	return result;
 }
 
 void GameObject::setColliderSize(float x, float y, float z)

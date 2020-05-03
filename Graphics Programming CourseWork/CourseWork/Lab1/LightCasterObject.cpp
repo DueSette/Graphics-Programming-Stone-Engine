@@ -1,12 +1,23 @@
 #include "LightCasterObject.h"
 
-void LightCasterObject::initialiseLightObject()
+void LightCasterObject::initialiseLightObject(glm::vec3 pos)
 {
-	//TODO load with lamp model, simple vertex and fragment shaders and purely white texture. Maybe add bloom later
+	GameObject::initialise(s_kModels + "crate2.obj", s_kTextures + "white.png", s_kShaders + "vertex_regular.vert", s_kShaders + "fragment_vanilla.frag", pos, ColliderType::NONE); //calls baseclass initialiser
+	//getCollider()->parent = this;
+	setScale(glm::vec3(0.33, 0.33, 0.33));
 }
 
-void LightCasterObject::updateShadersWithLight()
+void LightCasterObject::updateShadersWithLight(Shader* s, std::string lightNum)
 {
+	s->setVec4("dirLight.direction", glm::vec4(0.2, -1.0, 4.0, 0.0));
+	s->setVec3("dirLight.color", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	s->setVec4("lights[" + lightNum + "].pos", glm::vec4(getPosition(), 1.0));
+	s->setVec3("lights[" + lightNum + "].color", color);
+
+	s->setFloat("lights[" + lightNum + "].constantFall", 1.0f);
+	s->setFloat("lights[" + lightNum + "].linearFall", linearFalloff);
+	s->setFloat("lights[" + lightNum + "].quadraticFall", quadraticfallOff);
 }
 
 void LightCasterObject::setLightProperties(PointLightRange radius, glm::vec3 color)
