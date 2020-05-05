@@ -42,7 +42,6 @@ private:
 	void setupStartingScene();
 	void setShadowMap();
 	void ConfigureLightPerspective();
-	void TEMPLATE_STUPID_FUNCTION();
 
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;

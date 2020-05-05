@@ -84,7 +84,7 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
 	 vec3 lightDir = normalize(dirLight.position - Position);
 
 	 //AMBIENT
-	 vec3 ambient = mat.ambient * dirLight.color  * vec3(texture(mat.diffuse, TexCoord));
+	 vec3 ambient = mat.ambient * vec3(texture(mat.diffuse, TexCoord));
 
     // DIFFUSE
     float diffuseFactor = max(dot(Normal, lightDir), 0.0);
@@ -99,7 +99,7 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
     vec3 specular = dirLight.color * specularFactor * vec3(texture(mat.specular, TexCoord));
 
 	float shadow = CalculateShadow();
-    return (ambient + (1.0 - shadow) * (diffuse + specular));
+    return (ambient + (1.0 - shadow) * (diffuse + specular) * vec3(texture(mat.diffuse, TexCoord)));
 }
 
 void main()

@@ -4,8 +4,10 @@ layout(location = 0) in vec2 texCoord0;
 layout(location = 0) out vec4 color;
 
 uniform sampler2D u_Diffuse;
+uniform vec3 inColor;
 
 void main()
 {
-	color = texture2D(u_Diffuse, texCoord0);	 //original texture color
+	//color = texture2D(u_Diffuse, texCoord0);	 //original texture color
+	color = vec4(inColor, 1.0);
 }

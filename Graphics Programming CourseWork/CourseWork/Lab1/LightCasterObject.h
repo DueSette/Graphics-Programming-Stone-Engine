@@ -14,7 +14,8 @@ public:
 	void updateShadersWithLight(Shader* s, std::string lightNum);
 
 	void setLightProperties(PointLightRange radius, glm::vec3 color);
-
+	
+	inline glm::vec3 getColor() { return color; }
 private:
 	glm::vec3 color;
 	PointLightRange type;

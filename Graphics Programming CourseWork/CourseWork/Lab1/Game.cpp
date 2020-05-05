@@ -37,7 +37,7 @@ void Game::init()
 void Game::setupStartingScene()
 {
 	//MAP, SCENE MEMBERS
-	_map.initialise(s_kModels + "map.obj", s_kTextures + "bricks.jpg", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
+	_map.initialise(s_kModels + "map.obj", s_kTextures + "white.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
 
 	_map.setScale(glm::vec3(20, 20, 20));
@@ -64,9 +64,9 @@ void Game::setupStartingScene()
 	//VECTOR POPULATION
 	physicsGameObjectList.push_back(&_map);
 
+	gameObjectList.push_back(&_map);
 	gameObjectList.push_back(&_box0);
 	gameObjectList.push_back(&_box1);
-	gameObjectList.push_back(&_map);
 
 	lightCastersList.push_back(&_pointLight0);
 	lightCastersList.push_back(&_pointLight1);
@@ -76,7 +76,7 @@ void Game::setupStartingScene()
 	depthShader->createShaderProgram(s_kShaders + "vertex_depth.vert", s_kShaders + "fragment_depth.frag");
 
 	//MATERIAL SETTINGS
-	_map.setMaterial(0.27f, 32);
+	_map.setMaterial(0.08f, 32);
 	_box0.setMaterial(0.3f, 256);
 	_box1.setMaterial(0.3f, 256);
 
@@ -310,11 +310,16 @@ void Game::renderLoop()
 {
 	_gameDisplay.clearDisplay(0.2, 0.2, 0.2, 0);
 
-	_box0.rotate(VECTOR_UP * 0.006f);
-	_box1.rotate(VECTOR_RIGHT * 0.005f);
+	//_box0.rotate(VECTOR_UP * 0.006f); TODO MAKE THIS SEPARATE LOGIC LOOP
+	//_box1.rotate(VECTOR_RIGHT * 0.005f);
+	_box0.translate(VECTOR_UP * 0.01f * sin(counter));
 
-	//DEPTH PASS LOOP
-	
+	_pointLight0.translate(VECTOR_UP * 0.1f * sin(counter));
+	_pointLight1.translate(VECTOR_RIGHT * 0.1f * sin(counter));
+	_pointLight2.translate(VECTOR_FORWARD * 0.1f * sin(counter));
+
+	//////////////////////////
+	//DEPTH PASS LOOP	
 	depthShader->bind(); //we set the shader that will write to the depth texture
 	depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
 
@@ -329,7 +334,7 @@ void Game::renderLoop()
 
 	//RESET BUFFER DATA
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbind depth framebuffer
-	glViewport(0, 0, 1080, 720);
+	glViewport(0, 0, _gameDisplay.getInfo().width, _gameDisplay.getInfo().height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 	//COLOR PASS LOOP
@@ -343,7 +348,7 @@ void Game::renderLoop()
 		g->updateShaderWithMaterial(s); //puts material data into lit shader
 
 		glm::mat4 modelMatrix = g->getModel();
-		s->setVec3("dirLight.position", glm::vec3(-2.0f, 4.0f, -1.0f));
+		s->setVec3("dirLight.position", glm::vec3(-2.0f, 14.0f, -1.0f));
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _camera.getPosition());
 		s->setMat4("lightPerspectiveMatrix", directionalLightPerspective);
@@ -358,7 +363,8 @@ void Game::renderLoop()
 
 	for (LightCasterObject* l : lightCastersList)
 	{
-		l->exposeShaderProgram();
+		Shader* s = l->exposeShaderProgram();
+		s->setVec3("inColor", l->getColor());
 		l->drawProcedure(_player.cam);
 	}
 
@@ -387,13 +393,13 @@ void Game::setShadowMap()
 	//basic texture parameterisation (almost always the same process)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 	//========= attach texture as the target of the depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer); //we need to bind the buffer or it will attach the texture to the game screen buffer
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
-	glDrawBuffer(GL_NONE); //this and the line beloew are necessary to let openGL know that we are not using color data, only depth
+	glDrawBuffer(GL_NONE); //this and the line below are necessary to let openGL know that we are not using color data, only depth
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -401,44 +407,16 @@ void Game::setShadowMap()
 //we simulate (or use an existing) directional light and test depth from it's perspective (orthogonal projection, because the light is directional)
 void Game::ConfigureLightPerspective()
 {
-	float nearClip = 0.1f, farClip = 100.0f;
-	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, //frustum vertices
+	float nearClip = 1.0f, farClip = 100.0f;
+	glm::mat4 lightProjection = glm::perspective(70.0f, (float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //FoV and aspect ratio
 		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
 
 	//create light look-at matrix
-	glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), //light pos
+	glm::mat4 lightView = glm::lookAt(glm::vec3(-20.0f, 14.0f, -1.0f), //light pos
 		glm::vec3(0, 0, 0), //position the light is looking at
 		glm::vec3(0, 1, 0)); //simply up vector
 
 	directionalLightPerspective = lightProjection * lightView; //this resulting matrix is not very different from an MVP one (minus the model)
-}
-
-void Game::TEMPLATE_STUPID_FUNCTION()
-{
-	//SHADOW MAPPING PROCESSESSES
-	// 1. first render the scene from light perspective to depth map
-	depthShader->bind(); //we set the shader that will write to the depth texture
-	depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
-
-	glViewport(0, 0, 1024, 1024);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, real texture);
-
-	//RenderScene(depth shader);
-
-	//Reset viewport
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbind depth framebuffer
-	glViewport(0, 0, 1080, 720);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// 2. then render scene as normal with shadow mapping (using depth map)
-
-	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, real texture);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 }
 
 //NEW COLLISION METHOD
