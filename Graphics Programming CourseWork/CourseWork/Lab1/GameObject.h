@@ -27,6 +27,7 @@ public:
 	
 	Shader* exposeShaderProgram();
 	void drawProcedure(const Camera& cam);
+	void drawShadowMap(Shader* s);
 
 	void AddTextureMap(const std::string& fileName);
 

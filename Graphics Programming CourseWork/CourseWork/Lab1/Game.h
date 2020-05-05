@@ -33,13 +33,20 @@ public:
 	void run();
 
 private:
-
 	void init();
 	void gameLoop();
 	void physicsLoop();
 	void renderLoop();
 
+	//Shadowmapping processes
 	void setupStartingScene();
+	void setShadowMap();
+	void ConfigureLightPerspective();
+	void TEMPLATE_STUPID_FUNCTION();
+
+	unsigned int depthMapFrameBuffer;
+	unsigned int depthMapTexture;
+	glm::mat4 directionalLightPerspective;
 
 	//shader methods
 	void retrieveLightData(Shader* s);
@@ -61,6 +68,8 @@ private:
 	GameObject _box0, _box1, _explodingMonkey;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
+
+	Shader* depthShader = nullptr;
 
 	//Sound clips
 	unsigned int objectSpawnSound;

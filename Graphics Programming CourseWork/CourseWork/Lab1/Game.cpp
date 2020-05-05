@@ -30,22 +30,24 @@ void Game::init()
 	);
 
 	setupStartingScene();
+	setShadowMap();
+	ConfigureLightPerspective();
 }
 
 void Game::setupStartingScene()
 {
 	//MAP, SCENE MEMBERS
-	_map.initialise(s_kModels + "map.obj", s_kTextures + "bricks.jpg", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
+	_map.initialise(s_kModels + "map.obj", s_kTextures + "bricks.jpg", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
 
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
 
-	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
+	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
 	_box0.AddTextureMap(s_kTextures + "crate_specular.png");
 
-	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
+	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 	
@@ -54,24 +56,29 @@ void Game::setupStartingScene()
 	_pointLight0.setLightProperties(PointLightRange::SMALL, COLOR_BLUE);
 
 	_pointLight1.initialiseLightObject(glm::vec3(10, 10, 10));
-	_pointLight1.setLightProperties(PointLightRange::MEDIUM, VECTOR_ZERO);
+	_pointLight1.setLightProperties(PointLightRange::LARGE, COLOR_RED);
 
 	_pointLight2.initialiseLightObject(glm::vec3(4, 3, 5));
 	_pointLight2.setLightProperties(PointLightRange::SMALL, COLOR_GREEN);
 
 	//VECTOR POPULATION
 	physicsGameObjectList.push_back(&_map);
+
 	gameObjectList.push_back(&_box0);
 	gameObjectList.push_back(&_box1);
+	gameObjectList.push_back(&_map);
 
 	lightCastersList.push_back(&_pointLight0);
 	lightCastersList.push_back(&_pointLight1);
 	lightCastersList.push_back(&_pointLight2);
 
+	depthShader = new Shader();
+	depthShader->createShaderProgram(s_kShaders + "vertex_depth.vert", s_kShaders + "fragment_depth.frag");
+
 	//MATERIAL SETTINGS
-	_map.setMaterial(0.1f, 32);
-	_box0.setMaterial(0.1f, 256);
-	_box1.setMaterial(0.4f, 256);
+	_map.setMaterial(0.27f, 32);
+	_box0.setMaterial(0.3f, 256);
+	_box1.setMaterial(0.3f, 256);
 
 	//SOUND
 	objectSpawnSound = audioManager.loadSound("..\\res\\audio\\dolphin.wav");
@@ -301,42 +308,51 @@ void Game::retrieveLightData(Shader* s) //updates all the lit shaders with each 
 
 void Game::renderLoop()
 {
-	_gameDisplay.clearDisplay(0, 0, 0, 0);
+	_gameDisplay.clearDisplay(0.2, 0.2, 0.2, 0);
 
 	_box0.rotate(VECTOR_UP * 0.006f);
-	//_box1.rotate(VECTOR_RIGHT * 0.005f);
+	_box1.rotate(VECTOR_RIGHT * 0.005f);
 
-	//separate loops for normal game objects and physics-enabled gameobjects
+	//DEPTH PASS LOOP
+	
+	depthShader->bind(); //we set the shader that will write to the depth texture
+	depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
 
-	for (GameObject* g : gameObjectList)
+	glViewport(0, 0, 1024, 1024);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
 	{
+		g->drawShadowMap(depthShader);
+	}
+
+	//RESET BUFFER DATA
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbind depth framebuffer
+	glViewport(0, 0, 1080, 720);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	//COLOR PASS LOOP
+
+	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
+	{		
+		//NORMAL RENDERING
 		Shader* s = g->exposeShaderProgram();
 		if (!g->hasMaterial()) { continue; } //if the object has no material it means it probably isn't lit
 
 		g->updateShaderWithMaterial(s); //puts material data into lit shader
 
 		glm::mat4 modelMatrix = g->getModel();
+		s->setVec3("dirLight.position", glm::vec3(-2.0f, 4.0f, -1.0f));
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _camera.getPosition());
-
+		s->setMat4("lightPerspectiveMatrix", directionalLightPerspective);
 		retrieveLightData(s); //puts lights data into lit shader
+		
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 
-		g->drawProcedure(_player.cam);
-	}
-
-	for (PhysicsGameObject* g : physicsGameObjectList)
-	{
-		Shader* s = g->exposeShaderProgram();
-		if (!g->hasMaterial()) { continue; }
-
-		g->updateShaderWithMaterial(s);
-
-		glm::mat4 modelMatrix = g->getModel();
-		s->setMat4("ModelMatrix", modelMatrix);
-		s->setVec3("CameraPosition", _camera.getPosition());
-
-		retrieveLightData(s);
-
+		s->setInt("shadowMap", 2);
 		g->drawProcedure(_player.cam);
 	}
 
@@ -354,6 +370,75 @@ void Game::renderLoop()
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnd();
 	_gameDisplay.swapBuffer();
+}
+
+void Game::setShadowMap()
+{
+	//SHADOWMAPPING - we set a shadowmap buffer: it draws to a texture where only depth is stored
+
+	// ======== generate framebuffer handle
+	glGenFramebuffers(1, &depthMapFrameBuffer);
+
+	//========= generate texture to which attach the framebuffer's depth map
+	glGenTextures(1, &depthMapTexture);
+	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+	//basic texture parameterisation (almost always the same process)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	//========= attach texture as the target of the depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
+	glDrawBuffer(GL_NONE); //this and the line beloew are necessary to let openGL know that we are not using color data, only depth
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+//we simulate (or use an existing) directional light and test depth from it's perspective (orthogonal projection, because the light is directional)
+void Game::ConfigureLightPerspective()
+{
+	float nearClip = 0.1f, farClip = 100.0f;
+	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, //frustum vertices
+		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
+
+	//create light look-at matrix
+	glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), //light pos
+		glm::vec3(0, 0, 0), //position the light is looking at
+		glm::vec3(0, 1, 0)); //simply up vector
+
+	directionalLightPerspective = lightProjection * lightView; //this resulting matrix is not very different from an MVP one (minus the model)
+}
+
+void Game::TEMPLATE_STUPID_FUNCTION()
+{
+	//SHADOW MAPPING PROCESSESSES
+	// 1. first render the scene from light perspective to depth map
+	depthShader->bind(); //we set the shader that will write to the depth texture
+	depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
+
+	glViewport(0, 0, 1024, 1024);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, real texture);
+
+	//RenderScene(depth shader);
+
+	//Reset viewport
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbind depth framebuffer
+	glViewport(0, 0, 1080, 720);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// 2. then render scene as normal with shadow mapping (using depth map)
+
+	glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, real texture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 }
 
 //NEW COLLISION METHOD

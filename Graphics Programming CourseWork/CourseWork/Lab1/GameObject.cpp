@@ -101,6 +101,15 @@ void GameObject::drawProcedure(const Camera& cam) //all the graphics-related ope
 	_mesh->draw();	
 }
 
+void GameObject::drawShadowMap(Shader* s) //updates depth shader for shadow processing
+{
+	s->setMat4("model", getModel());
+	//_baseMap->Bind(0);
+	//if (_specularMap != nullptr) { _specularMap->Bind(1); }
+
+	_mesh->draw();
+}
+
 void GameObject::AddTextureMap(const std::string& fileName) //used to add an additional texture on top of the basemap (normal, specular, emission)
 {
 	_specularMap = new Texture(fileName);

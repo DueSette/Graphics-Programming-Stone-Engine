@@ -1,7 +1,8 @@
-#version 420
+#version 330 core
 in vec3 Position;
 in vec3 Normal;
 in vec2 TexCoord;
+in vec4 fragPosFromLightPerspective;
 
 layout( location = 0 ) out vec4 FragColor;
 
@@ -9,16 +10,14 @@ uniform vec3 CameraPosition;
 
 struct DirectionalLight //positionless light that is coming from infinitely far
 {
-	vec4 direction;
+	vec3 position;
 	vec3 color;
 };
 
 struct PointLight //"lightbulb" light, has a range and falloff logic
 {
-	vec4 pos;
-	
+	vec4 pos;	
 	vec3 color;
-
 	float constantFall, linearFall, quadraticFall;
 };
 
@@ -27,15 +26,28 @@ struct Material //The material this object is made of
 	float ambient; //How much ambient light the object catches (approximated from directional light colour). SET THIS BETWEEN 0 AND 1.
 	sampler2D diffuse; //Diffuse reflectivity
 	sampler2D specular; //Specular reflectivity
-
 	float shininess; // Specular shininess factor
 };
 
 uniform DirectionalLight dirLight;
 uniform PointLight[3] lights;
 uniform Material mat;
+uniform sampler2D shadowMap;
 
-vec3 CalculateLightContribution(PointLight light)
+//calculates whether the current fragment is in shadow by using depth testing from the directional light's perspective
+float CalculateShadow()
+{
+	//this line returns the coordinates of the fragment position from coord space to clip space (from -w, w) to (-1, 1)
+	 vec3 projCoords = fragPosFromLightPerspective.xyz / fragPosFromLightPerspective.w; //this is necessary only for projection perspective, not orthogonal
+	 projCoords = projCoords * 0.5 + 0.5; //normalise the depth between 0 and 1
+
+	 float closestDepth = texture(shadowMap, projCoords.xy).r; //samples the closest depth point from the light's perspective
+	 float currentDepth = projCoords.z;  //gets the depth of the current fragment
+
+	 return currentDepth > closestDepth ? 1.0 : 0.0; //if the current depth is greater than the minimum possible depth, it means the target is in shadow
+}
+
+vec3 CalculatePointLightContribution(PointLight light)
 {
 	vec3 texelColor = vec3(texture(mat.diffuse, TexCoord)); //samples texture color in given fragment, used diffuse (and ambient) maps
 
@@ -68,7 +80,8 @@ vec3 CalculateLightContribution(PointLight light)
 
 vec3 CalculateDirectionalLightContribution() //There is no light attenuation for directional light
 {
-	 vec3 lightDir = normalize(-dirLight.direction.xyz);
+	 //vec3 lightDir = normalize(-dirLight.direction.xyz); obtain correction if fed light direction from uniform
+	 vec3 lightDir = normalize(dirLight.position - Position);
 
 	 //AMBIENT
 	 vec3 ambient = mat.ambient * dirLight.color  * vec3(texture(mat.diffuse, TexCoord));
@@ -85,7 +98,8 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
     vec3 diffuse  = dirLight.color * diffuseFactor * vec3(texture(mat.diffuse, TexCoord));
     vec3 specular = dirLight.color * specularFactor * vec3(texture(mat.specular, TexCoord));
 
-    return (ambient + diffuse + specular);
+	float shadow = CalculateShadow();
+    return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
 
 void main()
@@ -97,8 +111,8 @@ void main()
 	for (int i = 0; i < lights.length; i++)
 	{
 		if(lights[i].constantFall == 0) {break;} //if we are iterating through an empty light, break
-		result += CalculateLightContribution(lights[i]);
+		result += CalculatePointLightContribution(lights[i]);
 	}
-
+	
 	FragColor = vec4(result, 1.0);
 }

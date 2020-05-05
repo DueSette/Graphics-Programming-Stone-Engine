@@ -119,6 +119,8 @@
     <None Include="..\res\shaders\vertex_phong.vert" />
     <None Include="..\res\shaders\vertex_regular.vert" />
     <None Include="..\res\shaders\vertex_scrollTexture.vert" />
+    <None Include="fragment_depth.frag" />
+    <None Include="vertex_depth.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
