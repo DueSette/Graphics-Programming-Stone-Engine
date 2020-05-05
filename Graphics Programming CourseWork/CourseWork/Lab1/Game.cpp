@@ -310,8 +310,8 @@ void Game::renderLoop()
 {
 	_gameDisplay.clearDisplay(0.2, 0.2, 0.2, 0);
 
-	//_box0.rotate(VECTOR_UP * 0.006f); TODO MAKE THIS SEPARATE LOGIC LOOP
-	//_box1.rotate(VECTOR_RIGHT * 0.005f);
+	_box0.rotate(VECTOR_UP * 0.006f); //TODO MAKE THIS SEPARATE LOGIC LOOP
+	_box1.rotate(VECTOR_RIGHT * 0.005f);
 	_box0.translate(VECTOR_UP * 0.01f * sin(counter));
 
 	_pointLight0.translate(VECTOR_UP * 0.1f * sin(counter));
@@ -336,9 +336,9 @@ void Game::renderLoop()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbind depth framebuffer
 	glViewport(0, 0, _gameDisplay.getInfo().width, _gameDisplay.getInfo().height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//COLOR PASS LOOP
 
+	//////////////////////////
+	//COLOR PASS LOOP
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
 	{		
 		//NORMAL RENDERING
@@ -348,7 +348,7 @@ void Game::renderLoop()
 		g->updateShaderWithMaterial(s); //puts material data into lit shader
 
 		glm::mat4 modelMatrix = g->getModel();
-		s->setVec3("dirLight.position", glm::vec3(-2.0f, 14.0f, -1.0f));
+		s->setVec3("dirLight.position", glm::vec3(-20.0f, 14.0f, -1.0f));
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _camera.getPosition());
 		s->setMat4("lightPerspectiveMatrix", directionalLightPerspective);

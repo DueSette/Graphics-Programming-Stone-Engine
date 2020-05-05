@@ -37,17 +37,19 @@ uniform sampler2D shadowMap;
 //calculates whether the current fragment is in shadow by using depth testing from the directional light's perspective
 float CalculateShadow()
 {
-	//this line returns the coordinates of the fragment position from coord space to clip space (from -w, w) to (-1, 1)
+	 //this line returns the coordinates of the fragment position from coord space to clip space (from -w, w) to (-1, 1)
 	 vec3 projCoords = fragPosFromLightPerspective.xyz / fragPosFromLightPerspective.w; //this is necessary only for projection perspective, not orthogonal
 	 projCoords = projCoords * 0.5 + 0.5; //normalise the depth between 0 and 1
 
 	 float closestDepth = texture(shadowMap, projCoords.xy).r; //samples the closest depth point from the light's perspective
 	 float currentDepth = projCoords.z;  //gets the depth of the current fragment
 
-	 return currentDepth > closestDepth ? 1.0 : 0.0; //if the current depth is greater than the minimum possible depth, it means the target is in shadow
+	 //we need to offset the depth of the fragment by an amount that depends on the angle between the light and the direction of the surface to avoid shadow-acne
+	 float shadowOffset = max(0.008 * (1.0 - dot(Normal, -normalize(vec3(dirLight.position) - Position))), 0.005);
+	 return currentDepth - shadowOffset > closestDepth ? 1.0 : 0.0; //if the current depth is greater than the minimum possible depth, it means the target is in shadow
 }
 
-vec3 CalculatePointLightContribution(PointLight light)
+vec3 CalculatePointLightContribution(PointLight light) //calculates the impact on the fragment for every light
 {
 	vec3 texelColor = vec3(texture(mat.diffuse, TexCoord)); //samples texture color in given fragment, used diffuse (and ambient) maps
 
@@ -80,12 +82,12 @@ vec3 CalculatePointLightContribution(PointLight light)
 
 vec3 CalculateDirectionalLightContribution() //There is no light attenuation for directional light
 {
-	 //vec3 lightDir = normalize(-dirLight.direction.xyz); obtain correction if fed light direction from uniform
-	 vec3 lightDir = normalize(dirLight.position - Position);
+	//vec3 lightDir = normalize(-dirLight.direction.xyz); obtain correction if fed light direction from uniform
+	vec3 lightDir = normalize(dirLight.position - Position);
 
-	 //AMBIENT
-	 vec3 ambient = mat.ambient * vec3(texture(mat.diffuse, TexCoord));
-
+	//AMBIENT
+	vec3 ambient = mat.ambient * vec3(texture(mat.diffuse, TexCoord));
+	
     // DIFFUSE
     float diffuseFactor = max(dot(Normal, lightDir), 0.0);
 
