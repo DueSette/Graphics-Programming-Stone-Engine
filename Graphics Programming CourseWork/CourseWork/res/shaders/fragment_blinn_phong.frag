@@ -37,16 +37,37 @@ uniform sampler2D shadowMap;
 //calculates whether the current fragment is in shadow by using depth testing from the directional light's perspective
 float CalculateShadow()
 {
+	 float shadow = 0.0;
+
 	 //this line returns the coordinates of the fragment position from coord space to clip space (from -w, w) to (-1, 1)
 	 vec3 projCoords = fragPosFromLightPerspective.xyz / fragPosFromLightPerspective.w; //this is necessary only for projection perspective, not orthogonal
 	 projCoords = projCoords * 0.5 + 0.5; //normalise the depth between 0 and 1
+
+	 if(projCoords.z > 1.0) { return 0.0; } //if the fragment is at more than 1 depth it means it is outside the view's range, so we simply declare it as non shadow
 
 	 float closestDepth = texture(shadowMap, projCoords.xy).r; //samples the closest depth point from the light's perspective
 	 float currentDepth = projCoords.z;  //gets the depth of the current fragment
 
 	 //we need to offset the depth of the fragment by an amount that depends on the angle between the light and the direction of the surface to avoid shadow-acne
-	 float shadowOffset = max(0.008 * (1.0 - dot(Normal, -normalize(vec3(dirLight.position) - Position))), 0.005);
-	 return currentDepth - shadowOffset > closestDepth ? 1.0 : 0.0; //if the current depth is greater than the minimum possible depth, it means the target is in shadow
+	 float shadowOffset = max(0.01 * (1.0 - dot(Normal, -normalize(vec3(dirLight.position) - Position))), 0.005);
+
+
+	 //======= SOFT SHADOWING PROCESS
+	 vec2 texelSize = 1.0 / textureSize(shadowMap, 0); //we get the size of ONE texel (divide shadowmap size at mip0 by one)
+	 for(int x = -2; x <= 2; ++x) //the iterator uses 0 as its center point because we use them to offset positions
+	 {
+		 for(int y = -2; y <= 2; ++y)
+		 {
+			//we sample the depth map at different positions. then we add the results together. This is used for softer edges.
+			float sampledDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+			shadow += currentDepth - shadowOffset > sampledDepth ? 1.0 : 0.0; //if the current depth is greater than the minimum possible depth, it means the target is in shadow
+		 }    
+	 }
+	 shadow /= 25.0; //25 is the amount of times we iterated over the depth texture (5 * 5)
+
+	 //shadow = currentDepth - shadowOffset > closestDepth ? 1.0 : 0.0; HERE FOR DOCUMENTATION PURPOSES, MULTI SAMPLED SHADOWS ARE NOW USED INSTEAD
+
+	 return shadow;
 }
 
 vec3 CalculatePointLightContribution(PointLight light) //calculates the impact on the fragment for every light
