@@ -48,6 +48,7 @@ void Game::setupStartingScene()
 	_box0.AddTextureMap(s_kTextures + "crate_specular.png");
 
 	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
+	_box1.AddTextureMap(s_kTextures + "crate_specular.png");
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 	
@@ -310,13 +311,13 @@ void Game::renderLoop()
 {
 	_gameDisplay.clearDisplay(0.2, 0.2, 0.2, 0);
 
-	_box0.rotate(VECTOR_UP * 0.006f); //TODO MAKE THIS SEPARATE LOGIC LOOP
-	_box1.rotate(VECTOR_RIGHT * 0.005f);
-	_box0.translate(VECTOR_UP * 0.01f * sin(counter));
+	//_box0.rotate(VECTOR_UP * 0.006f); //TODO MAKE THIS SEPARATE LOGIC LOOP
+	//_box1.rotate(VECTOR_RIGHT * 0.005f);
+	//_box0.translate(VECTOR_UP * 0.01f * sin(counter));
 
-	_pointLight0.translate(VECTOR_UP * 0.1f * sin(counter));
-	_pointLight1.translate(VECTOR_RIGHT * 0.1f * sin(counter));
-	_pointLight2.translate(VECTOR_FORWARD * 0.1f * sin(counter));
+	//_pointLight0.translate(VECTOR_UP * 0.1f * sin(counter));
+	//_pointLight1.translate(VECTOR_RIGHT * 0.1f * sin(counter));
+	//_pointLight2.translate(VECTOR_FORWARD * 0.1f * sin(counter));
 
 	//////////////////////////
 	//DEPTH PASS LOOP	
@@ -348,9 +349,9 @@ void Game::renderLoop()
 		g->updateShaderWithMaterial(s); //puts material data into lit shader
 
 		glm::mat4 modelMatrix = g->getModel();
-		s->setVec3("dirLight.position", glm::vec3(-20.0f, 14.0f, -1.0f));
+		s->setVec3("dirLight.position", glm::vec3(1.0, 1.0, 1.0));
 		s->setMat4("ModelMatrix", modelMatrix);
-		s->setVec3("CameraPosition", _camera.getPosition());
+		s->setVec3("CameraPosition", _player.cam.getPosition());
 		s->setMat4("lightPerspectiveMatrix", directionalLightPerspective);
 		retrieveLightData(s); //puts lights data into lit shader
 		
