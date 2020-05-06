@@ -10,7 +10,6 @@ void LightCasterObject::initialiseLightObject(glm::vec3 pos)
 void LightCasterObject::updateShadersWithLight(Shader* s, std::string lightNum)
 {
 	//s->setVec4("dirLight.direction", glm::vec4(0.2, -1.0, 4.0, 0.0));
-	s->setVec3("dirLight.color", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	s->setVec4("lights[" + lightNum + "].pos", glm::vec4(getPosition(), 1.0));
 	s->setVec3("lights[" + lightNum + "].color", color);

@@ -110,7 +110,7 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
 	vec3 ambient = mat.ambient * vec3(texture(mat.diffuse, TexCoord));
 	
     // DIFFUSE
-    float diffuseFactor = max(dot(Normal, lightDir), 0.0);
+    float diffuseFactor = max(dot(Normal, dirLight.position), 0.0);
 
     // SPECULAR
     vec3 viewDirection = normalize(CameraPosition - Position);	

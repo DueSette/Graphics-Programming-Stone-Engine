@@ -26,7 +26,6 @@ void phongModel(vec3 pos, vec3 norm, out vec3 ambient, out vec3 diffuse, out vec
 	//CALC DIFFUSE
 	vec3 vertexNormal = normalize(norm);
     vec3 lightDir = normalize(LightPosition - Position);
-
     float diff = max(dot(vertexNormal, vec3(LightPosition)), 0.0); //diffusive factor, based on the angle of the light hitting each point on the surface
     diffuse = diff * Kd * LightColor;
 

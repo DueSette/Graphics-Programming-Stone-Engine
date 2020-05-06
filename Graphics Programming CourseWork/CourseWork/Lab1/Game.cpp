@@ -43,7 +43,7 @@ void Game::setupStartingScene()
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
-	_map.AddSpecularMap(s_kTextures + "crate_specular.png");
+	_map.AddSpecularMap(s_kTextures + "concrete.png");
 
 	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
 	_box0.AddSpecularMap(s_kTextures + "crate_specular.png");
@@ -52,7 +52,7 @@ void Game::setupStartingScene()
 	_box1.AddSpecularMap(s_kTextures + "crate_specular.png");
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
-	_phongMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_phong.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
+	_phongMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_phong.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
 	
 	//LIGHTBULBS
 	_pointLight0.initialiseLightObject(glm::vec3(-4, 3, -5));
@@ -79,9 +79,9 @@ void Game::setupStartingScene()
 	depthShader->createShaderProgram(s_kShaders + "vertex_depth.vert", s_kShaders + "fragment_depth.frag");
 
 	//MATERIAL SETTINGS
-	_map.setMaterial(0.01f, 64);
-	_box0.setMaterial(0.3f, 256);
-	_box1.setMaterial(0.3f, 256);
+	_map.setMaterial(0.1f, 64);
+	_box0.setMaterial(0.05f, 128);
+	_box1.setMaterial(0.05f, 128);
 
 	//SOUND
 	objectSpawnSound = audioManager.loadSound("..\\res\\audio\\dolphin.wav");
@@ -355,7 +355,9 @@ void Game::renderLoop()
 		g->updateShaderWithMaterial(s); //puts material data into lit shader
 
 		glm::mat4 modelMatrix = g->getModel();
-		s->setVec3("dirLight.position", glm::vec3(1.0, 1.0, 1.0));
+		s->setVec3("dirLight.position", directionalLightPosition);
+		s->setVec3("dirLight.color", glm::vec3(0.5f, 0.5f, 0.5f));
+
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());
 		s->setMat4("lightPerspectiveMatrix", directionalLightPerspective);
@@ -385,7 +387,7 @@ void Game::renderLoop()
 	s = _phongMonkey.exposeShaderProgram();
 	s->setMat4("ModelMatrix", _phongMonkey.getModel());
 
-	s->setVec3("LightPosition", glm::vec3(1.0, 1.0, 1.0));
+	s->setVec3("LightPosition", directionalLightPosition);
 	s->setVec3("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	s->setVec3("CameraPosition", _player.cam.getPosition());
 	s->setVec3("Ka", glm::vec3(0.1, 0.1, 0.2));
@@ -437,7 +439,7 @@ void Game::ConfigureLightPerspective()
 		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
 
 	//create light look-at matrix
-	glm::mat4 lightView = glm::lookAt(glm::vec3(-20.0f, 14.0f, -1.0f), //light pos
+	glm::mat4 lightView = glm::lookAt(directionalLightPosition, //light pos
 		glm::vec3(0, 0, 0), //position the light is looking at
 		glm::vec3(0, 1, 0)); //simply up vector
 

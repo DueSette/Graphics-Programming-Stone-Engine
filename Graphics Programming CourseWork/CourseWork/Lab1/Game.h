@@ -47,6 +47,7 @@ private:
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;
 	glm::mat4 directionalLightPerspective;
+	glm::vec3 directionalLightPosition = glm::vec3(-10.0f, 14.0f, -1.0f);
 
 	//shader methods
 	void retrieveLightData(Shader* s);
