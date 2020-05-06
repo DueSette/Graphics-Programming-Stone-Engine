@@ -134,7 +134,7 @@ void main()
 	for (int i = 0; i < lights.length; i++)
 	{
 		if(lights[i].constantFall == 0) {break;} //if we are iterating through an empty light, break
-		//result += CalculatePointLightContribution(lights[i]);
+		result += CalculatePointLightContribution(lights[i]);
 	}
 	
 	FragColor = vec4(result, 1.0);
