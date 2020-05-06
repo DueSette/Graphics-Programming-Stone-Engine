@@ -29,7 +29,7 @@ public:
 	void drawProcedure(const Camera& cam);
 	void drawShadowMap(Shader* s);
 
-	void AddSpecularMap(const std::string& fileName);
+	void AddTextureMap(const std::string& fileName);
 
 	glm::vec3 getPosition();
 	glm::vec3 getRotation();

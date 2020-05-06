@@ -110,7 +110,7 @@ void GameObject::drawShadowMap(Shader* s) //updates depth shader for shadow proc
 	_mesh->draw();
 }
 
-void GameObject::AddSpecularMap(const std::string& fileName) //used to add an additional texture on top of the basemap (normal, specular, emission)
+void GameObject::AddTextureMap(const std::string& fileName) //used to add an additional texture on top of the basemap (normal, specular, emission)
 {
 	_specularMap = new Texture(fileName);
 }
