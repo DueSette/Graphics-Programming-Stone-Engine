@@ -35,6 +35,7 @@ public:
 private:
 	void init();
 	void gameLoop();
+	void logicLoop();
 	void physicsLoop();
 	void renderLoop();
 
@@ -64,7 +65,7 @@ private:
 
 	PhysicsGameObject _map;
 
-	GameObject _box0, _box1, _explodingMonkey;
+	GameObject _box0, _box1, _explodingMonkey, _phongMonkey;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
 

@@ -144,10 +144,10 @@
     <None Include="..\res\shaders\fragment_phong.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="vertex_depth.vert">
+    <None Include="..\res\shaders\fragment_depth.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="fragment_depth.frag">
+    <None Include="..\res\shaders\vertex_depth.vert">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>
