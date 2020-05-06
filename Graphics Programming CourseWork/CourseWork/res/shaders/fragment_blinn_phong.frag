@@ -120,9 +120,9 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
 	//COMBINING FACTORS
     vec3 diffuse  = dirLight.color * diffuseFactor * vec3(texture(mat.diffuse, TexCoord));
     vec3 specular = dirLight.color * specularFactor * vec3(texture(mat.specular, TexCoord));
-
+	//return specular;
 	float shadow = CalculateShadow();
-    return (ambient + (1.0 - shadow) * (diffuse + specular) * vec3(texture(mat.diffuse, TexCoord)));
+    return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
 
 void main()
@@ -134,7 +134,7 @@ void main()
 	for (int i = 0; i < lights.length; i++)
 	{
 		if(lights[i].constantFall == 0) {break;} //if we are iterating through an empty light, break
-		result += CalculatePointLightContribution(lights[i]);
+		//result += CalculatePointLightContribution(lights[i]);
 	}
 	
 	FragColor = vec4(result, 1.0);

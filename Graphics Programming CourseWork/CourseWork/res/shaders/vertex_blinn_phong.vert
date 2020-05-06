@@ -20,8 +20,10 @@ uniform mat4 lightPerspectiveMatrix; //we can see the depth of the resulting fra
 void main()
 {
 	TexCoord = VertexTexCoord;
-	Position = vec3(ModelMatrix * vec4(VertexPosition, 1.0));
-	fragPosFromLightPerspective = lightPerspectiveMatrix * vec4(Position, 1.0); //fragment position rendered from the perspective of the LIGHT and not the camera
+	Position = vec3(u_Transform * vec4(VertexPosition, 1.0));
+
+	vec3 x = vec3(ModelMatrix * vec4(VertexPosition, 1.0));
+	fragPosFromLightPerspective = lightPerspectiveMatrix * vec4(x, 1.0); //fragment position rendered from the perspective of the LIGHT and not the camera
 
 	Normal = mat3(transpose(inverse(ModelMatrix))) * VertexNormal;
 	gl_Position = u_Transform * vec4(VertexPosition,1.0);
