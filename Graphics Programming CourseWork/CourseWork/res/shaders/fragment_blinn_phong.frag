@@ -5,6 +5,7 @@ in vec2 TexCoord;
 in vec4 fragPosFromLightPerspective;
 
 layout( location = 0 ) out vec4 FragColor;
+layout (location = 1) out vec4 BrightnessColor; //this shader will output a second result to the framebuffer (drawing to another texture, of course)
 
 uniform vec3 CameraPosition;
 
@@ -137,5 +138,13 @@ void main()
 		result += CalculatePointLightContribution(lights[i]);
 	}
 	
-	FragColor = vec4(result, 1.0);
+	FragColor = vec4(result, 1.0); //The actual color of the pixel, not to be confused with what's below
+
+	//============BLOOM PASS (This does NOT apply bloom, it just checks which fragments are eligible for it)
+    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722)); //we compare the grayscale of the fragment against the "threshold" value for bloom
+
+    if(brightness > 1.0) //if brightness is still above 1.0 (which can be thanks to HDR) we keep the color
+        BrightnessColor = vec4(FragColor.rgb, 1.0);
+    else //if not we basically "discard" the fragment (only for the second texture target, the actual color is still kept and rendered)
+        BrightnessColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

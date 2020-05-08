@@ -34,6 +34,7 @@ void Game::init()
 	setupStartingScene();
 	setShadowMap();
 	setHDR();
+	setBloom();
 	ConfigureLightPerspective();
 }
 
@@ -89,6 +90,9 @@ void Game::setupStartingScene()
 
 	_tonemapperShader = new Shader();
 	_tonemapperShader->createShaderProgram(s_kShaders + "vertex_tonemapper.vert", s_kShaders + "fragment_tonemapper.frag");
+
+	_blurShader = new Shader();
+	_blurShader->createShaderProgram(s_kShaders + "vertex_gaussian_blur.vert", s_kShaders + "fragment_gaussian_blur.frag");
 
 	//MATERIAL SETTINGS
 	_map.setMaterial(0.1f, 64);
@@ -376,11 +380,11 @@ void Game::renderLoop()
 	}
 
 	//RESET BUFFER DATA
-	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer); //unbind depth framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer); //unbind depth framebuffer and bind HDR buffer
 	glViewport(0, 0, _gameDisplay.getInfo().width, _gameDisplay.getInfo().height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//COLOR PASS LOOP
+	//HDR PASS LOOP (this is the actual rendering of the scene, but we save the values to the HDR framebuffer for additional processing)
 
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
 	{	
@@ -442,17 +446,41 @@ void Game::renderLoop()
 		_environmentMonkey.drawProcedure(_player.cam);
 	}
 
-	//FINAL PASS
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//BLUR PASS
+	
+	_blurShader->bind();
+
+	horizontalBlurring = true;
+	firstBlurPass = true;
+
+	for (unsigned int i = 0; i < blurPassesAmount; i++)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFramebuffers[horizontalBlurring]);
+		_blurShader->setInt("horizontal", horizontalBlurring);
+		glBindTexture(GL_TEXTURE_2D, firstBlurPass ? hdrTextures[1] : pingpongTextures[!horizontalBlurring]);  // bind texture of other framebuffer (or scene if first iteration)
+		
+		renderQuadInFrontOfCamera(); //we render the previous scene as a texture on a quad, and apply blurring processing on that texture
+		horizontalBlurring = !horizontalBlurring;
+
+		if (firstBlurPass) { firstBlurPass = false; }
+	}
+
+	//BLOOM AND TONEMAPPING PASS
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); //we switch to the default framebuffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	_tonemapperShader->bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, hdrTexture);
-	_tonemapperShader->setInt("hdrBufferTexture", 0);
-	_tonemapperShader->setFloat("exposure", exposure);
-	renderQuadInFrontOfCamera();
+	glActiveTexture(GL_TEXTURE0); //we bind the render texture that was blurred in the previous post-processing step
+	glBindTexture(GL_TEXTURE_2D, hdrTextures[0]);
+	glActiveTexture(GL_TEXTURE1); //we bind 
+	glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontalBlurring]);
 
+	_tonemapperShader->bind();
+	_tonemapperShader->setInt("hdrBufferTexture", 0); //we feed that same texture as a sampler for the tonemapping shader, which will apply postprocess
+	_tonemapperShader->setInt("brightBlurredTexture", 1); //we feed that same texture as a sampler for the tonemapping shader, which will apply postprocess
+	_tonemapperShader->setFloat("exposure", exposure);
+
+	renderQuadInFrontOfCamera();//we render a quad while the tonemapper is bound and output the scene
+	
 	_gameDisplay.swapBuffer();
 }
 
@@ -501,15 +529,24 @@ void Game::ConfigureLightPerspective()
 
 void Game::setHDR()
 {
-	glGenFramebuffers(1, &hdrFrameBuffer);
+	glGenFramebuffers(1, &hdrFrameBuffer); //we create a new framebuffer used for the HDR pass
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer);
 	// create floating point color buffer
-	glGenTextures(1, &hdrTexture);
-	glBindTexture(GL_TEXTURE_2D, hdrTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1080, 720, 0, GL_RGBA, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glGenTextures(2, hdrTextures);
+	for (int i = 0; i < sizeof(hdrTextures) / sizeof(*hdrTextures); i++) //we repeat this process once for the hdr texture and once for the bloom texture
+	{
+		std::cout << i << " ITER ITER " << std::endl;
+		glBindTexture(GL_TEXTURE_2D, hdrTextures[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1080, 720, 0, GL_RGBA, GL_FLOAT, NULL); //These textures is FLOATING POINT, so it can store high dynamic range
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, hdrTextures[i], 0); //we bind both 
+	}
+
+	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachments); //we tell the framebuffer to store TWO outputs from the fragment shader
 
 	// create depth buffer (renderbuffer) UNCLEAR
 	unsigned int rboDepth;
@@ -518,12 +555,30 @@ void Game::setHDR()
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1080, 720);
 
 	// attach buffers
-	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrTexture, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		std::cout << "Framebuffer not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Game::setBloom()
+{
+	glGenFramebuffers(2, pingpongFramebuffers); //create textures for the pingpong framebuffer
+	glGenTextures(2, pingpongTextures);
+
+	for (unsigned int i = 0; i < 2; i++)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFramebuffers[i]); //select buffer
+
+		glBindTexture(GL_TEXTURE_2D, pingpongTextures[i]); //bind and define floating point textures (like the HDR ones they have high-range values)
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 1080, 720, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongTextures[i], 0);
+	}
 }
 
 void Game::StartupSkybox()

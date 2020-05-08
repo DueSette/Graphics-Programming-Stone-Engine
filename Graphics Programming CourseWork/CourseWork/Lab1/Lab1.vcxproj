@@ -112,6 +112,7 @@
     <None Include="..\res\shaders\fragment_depth.frag" />
     <None Include="..\res\shaders\fragment_environment.frag" />
     <None Include="..\res\shaders\fragment_explosionShader.frag" />
+    <None Include="..\res\shaders\fragment_gaussian_blur.frag" />
     <None Include="..\res\shaders\fragment_phong.frag" />
     <None Include="..\res\shaders\fragment_tonemapper.frag" />
     <None Include="..\res\shaders\fragment_vanilla.frag" />
@@ -123,6 +124,7 @@
     <None Include="..\res\shaders\vertex_depth.vert" />
     <None Include="..\res\shaders\vertex_environment.vert" />
     <None Include="..\res\shaders\vertex_explosionShader.vert" />
+    <None Include="..\res\shaders\vertex_gaussian_blur.vert" />
     <None Include="..\res\shaders\vertex_phong.vert" />
     <None Include="..\res\shaders\vertex_regular.vert" />
     <None Include="..\res\shaders\vertex_scrollTexture.vert" />

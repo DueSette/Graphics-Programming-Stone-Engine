@@ -45,14 +45,36 @@ private:
 	//Shadowmapping processes
 	void setShadowMap();
 	void ConfigureLightPerspective();
-
 	Shader* _depthShader = nullptr;
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;
 	glm::mat4 directionalLightPerspective;
 	glm::vec3 directionalLightPosition = glm::vec3(-10.0f, 14.0f, -1.0f);
 
-	//shader methods
+	//HDR and framebuffer processes
+	void setHDR();
+	unsigned int hdrFrameBuffer;
+	unsigned int hdrTextures[2]; //we have two hdrTextures that we will attach to the hdr framebuffer, one is the normal color, the other is used for bloom
+	Shader* _tonemapperShader;
+	float exposure = 1.5f;
+
+	//Bloom processes
+	void setBloom();
+	Shader* _blurShader;
+	unsigned int pingpongTextures[2];
+	unsigned int pingpongFramebuffers[2];
+	bool horizontalBlurring = true, firstBlurPass = true;
+	int blurPassesAmount = 10;
+
+	//Skybox methods and fields
+	GLuint skyboxVAO, skyboxVBO, cubemapTexture;
+	Shader* _skyboxShader;
+	Texture skybox;
+	void StartupSkybox();
+	void DrawSkybox();
+
+
+	//In-scene illumination 
 	void retrieveLightData(Shader* s);
 
 	//collider-agnostic collision algorithm
@@ -71,20 +93,6 @@ private:
 	GameObject _box0, _box1, _explodingMonkey, _phongMonkey, _environmentMonkey;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
-
-	//HDR and framebuffer methods
-	unsigned int hdrFrameBuffer;
-	unsigned int hdrTexture;
-	Shader* _tonemapperShader;
-	float exposure = 1.5f;
-	void setHDR();
-
-	//Skybox methods and fields
-	GLuint skyboxVAO, skyboxVBO, cubemapTexture;
-	Shader* _skyboxShader;
-	Texture skybox;
-	void StartupSkybox();
-	void DrawSkybox();
 
 	//Sound clips
 	unsigned int objectSpawnSound;

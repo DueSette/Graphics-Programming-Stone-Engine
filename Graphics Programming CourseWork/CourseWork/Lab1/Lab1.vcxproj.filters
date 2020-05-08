@@ -168,5 +168,11 @@
     <None Include="..\res\shaders\vertex_tonemapper.vert">
       <Filter>Resources</Filter>
     </None>
+    <None Include="..\res\shaders\fragment_gaussian_blur.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_gaussian_blur.vert">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
 </Project>
