@@ -29,8 +29,11 @@ void Game::init()
 		1000.0f
 	);
 
+	glEnable(GL_DEPTH_TEST);
+
 	setupStartingScene();
 	setShadowMap();
+	setHDR();
 	ConfigureLightPerspective();
 }
 
@@ -53,6 +56,7 @@ void Game::setupStartingScene()
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 	_phongMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_phong.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
+	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_environment.vert", s_kShaders + "fragment_environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
 	
 	//LIGHTBULBS
 	_pointLight0.initialiseLightObject(glm::vec3(-4, 3, -5));
@@ -75,8 +79,16 @@ void Game::setupStartingScene()
 	lightCastersList.push_back(&_pointLight1);
 	lightCastersList.push_back(&_pointLight2);
 
-	depthShader = new Shader();
-	depthShader->createShaderProgram(s_kShaders + "vertex_depth.vert", s_kShaders + "fragment_depth.frag");
+	//ADDITIONAL SHADERS
+	_depthShader = new Shader();
+	_depthShader->createShaderProgram(s_kShaders + "vertex_depth.vert", s_kShaders + "fragment_depth.frag");
+
+	_skyboxShader = new Shader();
+	_skyboxShader->createShaderProgram(s_kShaders + "shaderSkybox.vert", s_kShaders + "shaderSkybox.frag");
+	StartupSkybox();
+
+	_tonemapperShader = new Shader();
+	_tonemapperShader->createShaderProgram(s_kShaders + "vertex_tonemapper.vert", s_kShaders + "fragment_tonemapper.frag");
 
 	//MATERIAL SETTINGS
 	_map.setMaterial(0.1f, 64);
@@ -186,6 +198,29 @@ void Game::inputUpdate()
 			case SDLK_SPACE:
 				_player.jump(0.35f);
 				break;			
+			}
+			break;
+		}
+
+		case SDL_KEYDOWN:
+		{
+			switch (e.key.keysym.sym)
+			{
+			case SDLK_1:
+				exposure = 1;
+				break;
+			case SDLK_2:
+				exposure = 2;
+				break;
+			case SDLK_3:
+				exposure = 3;
+				break;
+			case SDLK_4:
+				exposure = 4;
+				break;
+			case SDLK_5:
+				exposure = 5;
+				break;
 			}
 			break;
 		}
@@ -324,11 +359,12 @@ void Game::retrieveLightData(Shader* s) //updates all the lit shaders with each 
 
 void Game::renderLoop()
 {
-	_gameDisplay.clearDisplay(0.2, 0.2, 0.2, 0);
+	_gameDisplay.clearDisplay(1.0, 0.2, 0.2, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//DEPTH PASS LOOP	
-	depthShader->bind(); //we set the shader that will write to the depth texture
-	depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
+	_depthShader->bind(); //we set the shader that will write to the depth texture
+	_depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
 
 	glViewport(0, 0, 1024, 1024);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
@@ -336,19 +372,18 @@ void Game::renderLoop()
 
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
 	{
-		g->drawShadowMap(depthShader);
+		g->drawShadowMap(_depthShader);
 	}
 
 	//RESET BUFFER DATA
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); //unbind depth framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer); //unbind depth framebuffer
 	glViewport(0, 0, _gameDisplay.getInfo().width, _gameDisplay.getInfo().height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//////////////////////////
 	//COLOR PASS LOOP
+
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
-	{		
-		//NORMAL RENDERING
+	{	
 		Shader* s = g->exposeShaderProgram();
 		if (!g->hasMaterial()) { continue; } //if the object has no material it means it probably isn't lit
 
@@ -377,29 +412,47 @@ void Game::renderLoop()
 		l->drawProcedure(_player.cam);
 	}
 
-	//EXPLODING SHADER ONLY, this is for the lab assignment task
-	Shader* s = _explodingMonkey.exposeShaderProgram();
-	s->setFloat("u_Time", counter);
-	_explodingMonkey.drawProcedure(_player.cam);
+	{
+		//EXPLODING SHADER ONLY, this is for the lab assignment task
+		Shader* s = _explodingMonkey.exposeShaderProgram();
+		s->setFloat("u_Time", counter);
+		_explodingMonkey.drawProcedure(_player.cam);
 
-	//PHONG-SHADING ONLY, this is for the lab assignment task
-	
-	s = _phongMonkey.exposeShaderProgram();
-	s->setMat4("ModelMatrix", _phongMonkey.getModel());
+		//PHONG-SHADING ONLY, this is for the lab assignment task
+		s = _phongMonkey.exposeShaderProgram();
+		s->setMat4("ModelMatrix", _phongMonkey.getModel());
+		s->setVec3("LightPosition", directionalLightPosition);
+		s->setVec3("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		s->setVec3("CameraPosition", _player.cam.getPosition());
+		s->setVec3("Ka", glm::vec3(0.1, 0.1, 0.2));
+		s->setVec3("Kd", glm::vec3(0.3, 0.3, 0.3));
+		s->setVec3("Ks", glm::vec3(1.0, 1.0, 0.6));
+		s->setFloat("Shininess", 32.0);
+		_phongMonkey.drawProcedure(_player.cam);
 
-	s->setVec3("LightPosition", directionalLightPosition);
-	s->setVec3("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	s->setVec3("CameraPosition", _player.cam.getPosition());
-	s->setVec3("Ka", glm::vec3(0.1, 0.1, 0.2));
-	s->setVec3("Kd", glm::vec3(0.3, 0.3, 0.9));
-	s->setVec3("Ks", glm::vec3(1.0, 1.0, 0.6));
-	s->setFloat("Shininess", 32.0);
+		//Skybox procedure
+		DrawSkybox();
 
-	_phongMonkey.drawProcedure(_player.cam);
-	
-	glEnableClientState(GL_COLOR_ARRAY);
-	glEnable(GL_FRAMEBUFFER_SRGB);
-	glEnd();
+		//Environment mapping procedure
+		s = _environmentMonkey.exposeShaderProgram();
+		s->setVec3("CameraPosition", _player.cam.getPosition());
+		s->setMat4("ViewProjectionMatrix", _player.cam.GetViewProjection());
+		s->setMat4("ModelMatrix", _environmentMonkey.getModel());
+		s->setInt("skyTexture", 0);
+		_environmentMonkey.drawProcedure(_player.cam);
+	}
+
+	//FINAL PASS
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	_tonemapperShader->bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, hdrTexture);
+	_tonemapperShader->setInt("hdrBufferTexture", 0);
+	_tonemapperShader->setFloat("exposure", exposure);
+	renderQuadInFrontOfCamera();
+
 	_gameDisplay.swapBuffer();
 }
 
@@ -428,12 +481,12 @@ void Game::setShadowMap()
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
 	glDrawBuffer(GL_NONE); //this and the line below are necessary to let openGL know that we are not using color data, only depth
 	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-//we simulate (or use an existing) directional light and test depth from it's perspective (orthogonal projection, because the light is directional)
 void Game::ConfigureLightPerspective()
 {
+	//we use a directional light and test depth from its perspective (orthogonal projection, because the light is directional)
+
 	float nearClip = 1.0f, farClip = 100.0f;
 	glm::mat4 lightProjection = glm::perspective(70.0f, (float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //FoV and aspect ratio
 		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
@@ -446,7 +499,149 @@ void Game::ConfigureLightPerspective()
 	directionalLightPerspective = lightProjection * lightView; //this resulting matrix is not very different from an MVP one (minus the model)
 }
 
-//NEW COLLISION METHOD
+void Game::setHDR()
+{
+	glGenFramebuffers(1, &hdrFrameBuffer);
+	// create floating point color buffer
+	glGenTextures(1, &hdrTexture);
+	glBindTexture(GL_TEXTURE_2D, hdrTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1080, 720, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	// create depth buffer (renderbuffer) UNCLEAR
+	unsigned int rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1080, 720);
+
+	// attach buffers
+	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, hdrTexture, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Game::StartupSkybox()
+{
+	std::vector<std::string> faces
+	{
+		"..\\res\\textures\\skybox\\right.jpg",
+		"..\\res\\textures\\skybox\\left.jpg",
+		"..\\res\\textures\\skybox\\top.jpg",
+		"..\\res\\textures\\skybox\\bottom.jpg",
+		"..\\res\\textures\\skybox\\front.jpg",
+		"..\\res\\textures\\skybox\\back.jpg"
+	};
+
+	cubemapTexture = skybox.loadCubemap(faces); //Load the cubemap using "faces" into cubemapTextures
+
+	float skyboxVertices[] = {
+		// positions          
+		-150.0f,  150.0f, -150.0f,
+		-150.0f, -150.0f, -150.0f,
+		150.0f, -150.0f, -150.0f,
+		150.0f, -150.0f, -150.0f,
+		150.0f,  150.0f, -150.0f,
+		-150.0f,  150.0f, -150.0f,
+
+		-150.0f, -150.0f,  150.0f,
+		-150.0f, -150.0f, -150.0f,
+		-150.0f,  150.0f, -150.0f,
+		-150.0f,  150.0f, -150.0f,
+		-150.0f,  150.0f,  150.0f,
+		-150.0f, -150.0f,  150.0f,
+
+		150.0f, -150.0f, -150.0f,
+		150.0f, -150.0f,  150.0f,
+		150.0f,  150.0f,  150.0f,
+		150.0f,  150.0f,  150.0f,
+		150.0f,  150.0f, -150.0f,
+		150.0f, -150.0f, -150.0f,
+
+		-150.0f, -150.0f,  150.0f,
+		-150.0f,  150.0f,  150.0f,
+		 150.0f,  150.0f,  150.0f,
+		 150.0f,  150.0f,  150.0f,
+		 150.0f, -150.0f,  150.0f,
+		-150.0f, -150.0f,  150.0f,
+
+		-150.0f,  150.0f, -150.0f,
+		 150.0f,  150.0f, -150.0f,
+		 150.0f,  150.0f,  150.0f,
+		 150.0f,  150.0f,  150.0f,
+		-150.0f,  150.0f,  150.0f,
+		-150.0f,  150.0f, -150.0f,
+
+		-150.0f, -150.0f, -150.0f,
+		-150.0f, -150.0f,  150.0f,
+		 150.0f, -150.0f, -150.0f,
+		 150.0f, -150.0f, -150.0f,
+		-150.0f, -150.0f,  150.0f,
+		 150.0f, -150.0f,  150.0f
+	};
+
+	//use openGL functionality to generate & bind data into buffers
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void Game::DrawSkybox()
+{
+	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+	_skyboxShader->bind();
+	_skyboxShader->setInt("skybox", 0);
+	_skyboxShader->setMat4("viewProjection", _player.cam.GetViewProjection());
+
+	// skybox cube
+
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS); // set depth function back to default
+}
+
+void Game::renderQuadInFrontOfCamera()
+{
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
+
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
 bool Game::checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2)
 {
 	if (abs(pos1.x - pos2.x) < s1.x + s2.x)

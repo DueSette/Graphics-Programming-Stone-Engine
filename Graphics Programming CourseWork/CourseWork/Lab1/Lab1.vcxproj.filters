@@ -150,5 +150,23 @@
     <None Include="..\res\shaders\vertex_depth.vert">
       <Filter>Resources</Filter>
     </None>
+    <None Include="..\res\shaders\shaderSkybox.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\shaderSkybox.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_environment.vert">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\fragment_environment.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\fragment_tonemapper.frag">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="..\res\shaders\vertex_tonemapper.vert">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -33,17 +33,20 @@ public:
 	void run();
 
 private:
+	//Fundamental methods
 	void init();
+	void setupStartingScene();
 	void gameLoop();
 	void logicLoop();
 	void physicsLoop();
 	void renderLoop();
+	void renderQuadInFrontOfCamera(); //this draws a quad in front of the camera, it is used to process framebuffer textures
 
 	//Shadowmapping processes
-	void setupStartingScene();
 	void setShadowMap();
 	void ConfigureLightPerspective();
 
+	Shader* _depthShader = nullptr;
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;
 	glm::mat4 directionalLightPerspective;
@@ -56,7 +59,6 @@ private:
 	static bool checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2);
 
 	Player _player;
-	Camera _camera;
 	Display _gameDisplay;
 	GameState _gameState;
 
@@ -66,11 +68,23 @@ private:
 
 	PhysicsGameObject _map;
 
-	GameObject _box0, _box1, _explodingMonkey, _phongMonkey;
+	GameObject _box0, _box1, _explodingMonkey, _phongMonkey, _environmentMonkey;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
 
-	Shader* depthShader = nullptr;
+	//HDR and framebuffer methods
+	unsigned int hdrFrameBuffer;
+	unsigned int hdrTexture;
+	Shader* _tonemapperShader;
+	float exposure = 1.5f;
+	void setHDR();
+
+	//Skybox methods and fields
+	GLuint skyboxVAO, skyboxVBO, cubemapTexture;
+	Shader* _skyboxShader;
+	Texture skybox;
+	void StartupSkybox();
+	void DrawSkybox();
 
 	//Sound clips
 	unsigned int objectSpawnSound;
