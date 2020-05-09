@@ -144,9 +144,6 @@
     <None Include="..\res\shaders\gaussian_blur.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\phong.vert">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="..\res\shaders\regular.vert">
       <Filter>Resources</Filter>
     </None>
@@ -163,9 +160,6 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="..\res\shaders\vanilla.frag">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="..\res\shaders\phong.frag">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

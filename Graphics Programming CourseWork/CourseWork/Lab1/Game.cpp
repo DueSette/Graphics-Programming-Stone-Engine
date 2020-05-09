@@ -29,6 +29,7 @@ void Game::init()
 		1000.0f //Far clip
 	);
 
+	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 
 	setupStartingScene();
@@ -40,7 +41,6 @@ void Game::init()
 
 void Game::setupStartingScene()
 {
-	glCullFace(GL_BACK);
 	//MAP, SCENE OBJECTS
 	_map.initialise(s_kModels + "map.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
@@ -376,7 +376,7 @@ void Game::renderLoop() //where all the rendering is called from
 	//==============
 	//DEPTH PASS LOOP (we create the shadowmap as seen from the dir-light perspective)
 	//==============
-	glViewport(0, 0, 2048, 2048); //resolution of the shadowmap, not the actual screen
+	glViewport(0, 0, 8192, 8192); //resolution of the shadowmap, not the actual screen
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -510,7 +510,7 @@ void Game::setShadowMap()
 	//========= generate texture to which attach the framebuffer's depth map
 	glGenTextures(1, &depthMapTexture);
 	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 8192, 8192, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	//basic texture parameterisation (almost always the same process)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

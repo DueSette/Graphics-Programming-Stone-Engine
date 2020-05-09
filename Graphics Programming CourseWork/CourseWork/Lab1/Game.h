@@ -51,7 +51,7 @@ private:
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;
 	glm::mat4 directionalLightPerspective;
-	glm::vec3 directionalLightPosition = glm::vec3(41.0f, 100.0f, -21.0f);
+	glm::vec3 directionalLightPosition = glm::vec3(41.0f, 90.0f, -21.0f);
 
 	//HDR and framebuffer processes
 	void setHDR();

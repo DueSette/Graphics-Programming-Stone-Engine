@@ -119,8 +119,6 @@
     <None Include="..\res\shaders\explosionShader.vert" />
     <None Include="..\res\shaders\gaussian_blur.frag" />
     <None Include="..\res\shaders\gaussian_blur.vert" />
-    <None Include="..\res\shaders\phong.frag" />
-    <None Include="..\res\shaders\phong.vert" />
     <None Include="..\res\shaders\regular.vert" />
     <None Include="..\res\shaders\skybox.frag" />
     <None Include="..\res\shaders\skybox.vert" />

@@ -4,7 +4,7 @@ in vec3 Normal;
 in vec2 TexCoord;
 in vec4 fragPosFromLightPerspective;
 
-layout( location = 0 ) out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
 layout (location = 1) out vec4 BrightnessColor; //this shader will output a second result to the framebuffer (drawing to another texture, of course)
 
 uniform vec3 CameraPosition;
@@ -55,16 +55,18 @@ float CalculateShadow()
 
 	 //======= SOFT SHADOWING PROCESS
 	 vec2 texelSize = 1.0 / textureSize(shadowMap, 0); //we get the size of ONE texel (divide shadowmap size at mip0 by one)
-	 for(int x = -2; x <= 2; ++x) //the iterator uses 0 as its center point because we use them to offset positions
+	 int passes = 0;
+	 for(int x = -1; x <= 1; ++x) //the iterator uses 0 as its center point because we use them to offset positions
 	 {
-		 for(int y = -2; y <= 2; ++y)
+		 for(int y = -1; y <= 1; ++y)
 		 {
 			//we sample the depth map at different positions. then we add the results together. This is used for softer edges.
 			float sampledDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
 			shadow += currentDepth - shadowOffset > sampledDepth ? 1.0 : 0.0; //if the current depth is greater than the minimum possible depth, it means the target is in shadow
+			passes++;
 		 }    
 	 }
-	 shadow /= 25.0; //25 is the amount of times we iterated over the depth texture (5 * 5)
+	 shadow /= passes; //25 is the amount of times we iterated over the depth texture (5 * 5)
 
 	 //shadow = currentDepth - shadowOffset > closestDepth ? 1.0 : 0.0; HERE FOR DOCUMENTATION PURPOSES, MULTI SAMPLED SHADOWS ARE NOW USED INSTEAD
 
