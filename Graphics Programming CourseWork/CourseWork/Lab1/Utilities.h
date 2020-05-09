@@ -21,6 +21,9 @@
 #define COLOR_PURPLE glm::vec3(0.6f, 0.2f, 0.39f)
 #define COLOR_CYAN glm::vec3(0.0f, 0.58f, 0.6f)
 
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
+
 //========Useful constants to shorten filepaths and make them less error prone========
 static const std::string s_kModels = "..\\res\\models\\";
 static const std::string s_kTextures = "..\\res\\textures\\";

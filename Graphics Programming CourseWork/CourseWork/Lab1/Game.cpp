@@ -24,7 +24,7 @@ void Game::init()
 	(
 		vec3(0.0f, 2.0f, -10.0f), //Starting pos
 		70.0f, //FOV
-		(float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //Aspect ratio
+		(float)SCREEN_WIDTH / SCREEN_HEIGHT, //Aspect ratio
 		0.01f, //Near clip
 		1000.0f //Far clip
 	);
@@ -40,6 +40,7 @@ void Game::init()
 
 void Game::setupStartingScene()
 {
+	glCullFace(GL_BACK);
 	//MAP, SCENE OBJECTS
 	_map.initialise(s_kModels + "map.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
@@ -49,11 +50,14 @@ void Game::setupStartingScene()
 	_map.setPosition(-VECTOR_UP * 3.0f);
 	_map.AddSpecularMap(s_kTextures + "concrete.png");
 
-	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
-	_box0.AddSpecularMap(s_kTextures + "crate_specular.png");
+	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
+	_box0.AddSpecularMap(s_kTextures + "hypnotic.png");
 
-	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
-	_box1.AddSpecularMap(s_kTextures + "crate_specular.png");
+	_giantMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(2, 0.5, 0), ColliderType::NONE);
+	_giantMonkey.AddSpecularMap(s_kTextures + "hypnotic.png");
+
+	_dolphin.initialise(s_kModels + "dolf.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(4, -44, 0), ColliderType::NONE);
+	_dolphin.AddSpecularMap(s_kTextures + "hypnotic.png");
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "environment.vert", s_kShaders + "environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
@@ -73,7 +77,8 @@ void Game::setupStartingScene()
 
 	gameObjectList.push_back(&_map);
 	gameObjectList.push_back(&_box0);
-	gameObjectList.push_back(&_box1);
+	gameObjectList.push_back(&_giantMonkey);
+	gameObjectList.push_back(&_dolphin);
 
 	lightCastersList.push_back(&_pointLight0);
 	lightCastersList.push_back(&_pointLight1);
@@ -96,7 +101,8 @@ void Game::setupStartingScene()
 	//MATERIAL SETTINGS
 	_map.setMaterial(0.1f, 64);
 	_box0.setMaterial(0.05f, 128);
-	_box1.setMaterial(0.05f, 128);
+	_giantMonkey.setMaterial(0.05f, 128);
+	_dolphin.setMaterial(0.05f, 128);
 
 	//SOUND
 	objectSpawnSound = audioManager.loadSound("..\\res\\audio\\dolphin.wav");
@@ -349,14 +355,16 @@ bool Game::checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec
 
 void Game::logicLoop()
 {
-	_box0.rotate(VECTOR_UP * 0.006f); //TODO MAKE THIS SEPARATE LOGIC LOOP
-	_box1.rotate(VECTOR_RIGHT * 0.005f);
+	_box0.rotate(VECTOR_UP * 0.006f);
 	_box0.translate(VECTOR_UP * 0.01f * sin(counter));
+
+	_giantMonkey.rotate(VECTOR_RIGHT * 0.004f);
+
+	_dolphin.rotate(VECTOR_RIGHT * 0.004f);
 
 	_pointLight0.translate(VECTOR_UP * 0.1f * sin(counter));
 	_pointLight1.translate(VECTOR_RIGHT * 0.1f * sin(counter));
 	_pointLight2.translate(VECTOR_FORWARD * 0.1f * sin(counter));
-
 }
 
 #pragma region ====== RENDERING RELATED METHODS ========
@@ -368,7 +376,7 @@ void Game::renderLoop() //where all the rendering is called from
 	//==============
 	//DEPTH PASS LOOP (we create the shadowmap as seen from the dir-light perspective)
 	//==============
-	glViewport(0, 0, 1024, 1024); //resolution of the shadowmap, not the actual screen
+	glViewport(0, 0, 2048, 2048); //resolution of the shadowmap, not the actual screen
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -385,7 +393,7 @@ void Game::renderLoop() //where all the rendering is called from
 	//==============
 
 	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer); //unbind depth framebuffer and bind HDR buffer
-	glViewport(0, 0, _gameDisplay.getInfo().width, _gameDisplay.getInfo().height);
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
@@ -397,7 +405,7 @@ void Game::renderLoop() //where all the rendering is called from
 
 		glm::mat4 modelMatrix = g->getModel();
 		s->setVec3("dirLight.position", directionalLightPosition);
-		s->setVec3("dirLight.color", glm::vec3(0.5f, 0.5f, 0.5f));
+		s->setVec3("dirLight.color", glm::vec3(0.15f, 0.15f, 0.15f));
 
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());
@@ -478,9 +486,10 @@ void Game::configureDirectionalLightPerspective()
 {
 	//we use a directional light and test depth from its perspective (orthogonal projection, because the light is directional)
 
-	float nearClip = 1.0f, farClip = 100.0f;
+	float nearClip = 0.3f, farClip = 150.0f;
 	//create projection matrix
-	glm::mat4 lightProjection = glm::perspective(70.0f, (float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //FoV and aspect ratio
+	glm::mat4 lightProjection = //glm::perspective(70.0f, (float)SCREEN_WIDTH / SCREEN_HEIGHT, //PERSPECTIVE CAM
+		glm::ortho(-150.0f, 150.0f, -150.0f, 150.0f, //ORTHOGRAPHIC CAM
 		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
 
 	//create light look-at matrix (AKA view matrix)
@@ -501,7 +510,7 @@ void Game::setShadowMap()
 	//========= generate texture to which attach the framebuffer's depth map
 	glGenTextures(1, &depthMapTexture);
 	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	//basic texture parameterisation (almost always the same process)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -526,9 +535,8 @@ void Game::setHDR()
 	glGenTextures(2, hdrTextures);
 	for (int i = 0; i < sizeof(hdrTextures) / sizeof(*hdrTextures); i++) //we repeat this process once for the hdr texture and once for the bloom texture
 	{
-		std::cout << i << " ITER ITER " << std::endl;
 		glBindTexture(GL_TEXTURE_2D, hdrTextures[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1080, 720, 0, GL_RGBA, GL_FLOAT, NULL); //These textures are FLOATING POINT, so they can store high dynamic range
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); //These textures are FLOATING POINT, so they can store high dynamic range
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -543,7 +551,7 @@ void Game::setHDR()
 	unsigned int rboDepth;
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1080, 720);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth); 	// Attach depth component to renderbuffer
 }
 
@@ -557,7 +565,7 @@ void Game::setBloom()
 		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFramebuffers[i]); //select buffer
 
 		glBindTexture(GL_TEXTURE_2D, pingpongTextures[i]); //bind and define floating point textures (like the HDR ones they have high-range values)
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 1080, 720, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

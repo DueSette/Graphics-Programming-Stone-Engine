@@ -23,7 +23,7 @@ void Display::initialise()
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);// set up z-buffer
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1); // set up double buffer   
 
-	_window = SDL_CreateWindow("Andrea Caramia Coursework", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, getInfo().width, getInfo().height, SDL_WINDOW_OPENGL); // create window
+	_window = SDL_CreateWindow("Andrea Caramia Coursework", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL); // create window
 
 	if (_window == nullptr)
 	{

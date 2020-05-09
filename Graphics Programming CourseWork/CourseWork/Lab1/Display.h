@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL/SDL.h>
 #include <GL\glew.h>
+#include "Utilities.h"
 #include <iostream>
 #include <string>
 
