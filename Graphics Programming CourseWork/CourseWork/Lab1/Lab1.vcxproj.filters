@@ -111,67 +111,61 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\res\shaders\geometry_explosionShader.geom">
+    <None Include="..\res\shaders\blinn_phong.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_explosionShader.frag">
+    <None Include="..\res\shaders\blinn_phong.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_vanilla.frag">
+    <None Include="..\res\shaders\depth.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_VCR.frag">
+    <None Include="..\res\shaders\depth.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_explosionShader.vert">
+    <None Include="..\res\shaders\environment.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_regular.vert">
+    <None Include="..\res\shaders\environment.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_scrollTexture.vert">
+    <None Include="..\res\shaders\explosionShader.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_blinn_phong.vert">
+    <None Include="..\res\shaders\explosionShader.geom">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_phong.vert">
+    <None Include="..\res\shaders\explosionShader.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_blinn_phong.frag">
+    <None Include="..\res\shaders\gaussian_blur.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_phong.frag">
+    <None Include="..\res\shaders\gaussian_blur.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_depth.frag">
+    <None Include="..\res\shaders\phong.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_depth.vert">
+    <None Include="..\res\shaders\regular.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\shaderSkybox.frag">
+    <None Include="..\res\shaders\skybox.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\shaderSkybox.vert">
+    <None Include="..\res\shaders\skybox.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_environment.vert">
+    <None Include="..\res\shaders\tonemapper.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_environment.frag">
+    <None Include="..\res\shaders\tonemapper.vert">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\fragment_tonemapper.frag">
+    <None Include="..\res\shaders\vanilla.frag">
       <Filter>Resources</Filter>
     </None>
-    <None Include="..\res\shaders\vertex_tonemapper.vert">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="..\res\shaders\fragment_gaussian_blur.frag">
-      <Filter>Resources</Filter>
-    </None>
-    <None Include="..\res\shaders\vertex_gaussian_blur.vert">
+    <None Include="..\res\shaders\phong.frag">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

@@ -40,8 +40,8 @@ void Game::init()
 
 void Game::setupStartingScene()
 {
-	//MAP, SCENE MEMBERS
-	_map.initialise(s_kModels + "map.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
+	//MAP, SCENE OBJECTS
+	_map.initialise(s_kModels + "map.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, -1, 0), ColliderType::BOX);
 	_map.isKinematic = true;
 
 	_map.setScale(glm::vec3(20, 20, 20));
@@ -49,14 +49,14 @@ void Game::setupStartingScene()
 	_map.setPosition(-VECTOR_UP * 3.0f);
 	_map.AddSpecularMap(s_kTextures + "concrete.png");
 
-	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
+	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
 	_box0.AddSpecularMap(s_kTextures + "crate_specular.png");
 
-	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "vertex_blinn_phong.vert", s_kShaders + "fragment_blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
+	_box1.initialise(s_kModels + "crate2.obj", s_kTextures + "crate_basemap.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(4, 1, 0), ColliderType::NONE);
 	_box1.AddSpecularMap(s_kTextures + "crate_specular.png");
 
-	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
-	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_environment.vert", s_kShaders + "fragment_environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
+	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
+	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "environment.vert", s_kShaders + "environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
 	
 	//LIGHTBULBS
 	_pointLight0.initialiseLightObject(glm::vec3(-4, 3, -5));
@@ -81,17 +81,17 @@ void Game::setupStartingScene()
 
 	//ADDITIONAL SHADERS
 	_depthShader = new Shader();
-	_depthShader->createShaderProgram(s_kShaders + "vertex_depth.vert", s_kShaders + "fragment_depth.frag");
+	_depthShader->createShaderProgram(s_kShaders + "depth.vert", s_kShaders + "depth.frag");
 
 	_skyboxShader = new Shader();
-	_skyboxShader->createShaderProgram(s_kShaders + "shaderSkybox.vert", s_kShaders + "shaderSkybox.frag");
+	_skyboxShader->createShaderProgram(s_kShaders + "skybox.vert", s_kShaders + "skybox.frag");
 	setSkybox();
 
 	_tonemapperShader = new Shader();
-	_tonemapperShader->createShaderProgram(s_kShaders + "vertex_tonemapper.vert", s_kShaders + "fragment_tonemapper.frag");
+	_tonemapperShader->createShaderProgram(s_kShaders + "tonemapper.vert", s_kShaders + "tonemapper.frag");
 
 	_blurShader = new Shader();
-	_blurShader->createShaderProgram(s_kShaders + "vertex_gaussian_blur.vert", s_kShaders + "fragment_gaussian_blur.frag");
+	_blurShader->createShaderProgram(s_kShaders + "gaussian_blur.vert", s_kShaders + "gaussian_blur.frag");
 
 	//MATERIAL SETTINGS
 	_map.setMaterial(0.1f, 64);

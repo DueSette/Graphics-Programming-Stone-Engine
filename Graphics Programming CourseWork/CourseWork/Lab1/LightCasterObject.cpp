@@ -2,15 +2,12 @@
 
 void LightCasterObject::initialiseLightObject(glm::vec3 pos)
 {
-	GameObject::initialise(s_kModels + "crate2.obj", s_kTextures + "white.png", s_kShaders + "vertex_regular.vert", s_kShaders + "fragment_vanilla.frag", pos, ColliderType::NONE); //calls baseclass initialiser
-	//getCollider()->parent = this;
+	GameObject::initialise(s_kModels + "crate2.obj", s_kTextures + "white.png", s_kShaders + "vanilla.vert", s_kShaders + "vanilla.frag", pos, ColliderType::NONE); //calls baseclass initialiser
 	setScale(glm::vec3(0.33, 0.33, 0.33));
 }
 
 void LightCasterObject::updateShadersWithLight(Shader* s, std::string lightNum)
 {
-	//s->setVec4("dirLight.direction", glm::vec4(0.2, -1.0, 4.0, 0.0));
-
 	s->setVec4("lights[" + lightNum + "].pos", glm::vec4(getPosition(), 1.0));
 	s->setVec3("lights[" + lightNum + "].color", color);
 
