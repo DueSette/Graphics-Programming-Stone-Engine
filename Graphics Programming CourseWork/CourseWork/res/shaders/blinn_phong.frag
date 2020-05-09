@@ -95,7 +95,6 @@ vec3 CalculatePointLightContribution(PointLight light) //calculates the impact o
 	float specularFactor = pow(max(dot(Normal, halfwayVector), 0.0), 1 * mat.shininess);
 	
 	vec3 specular = light.color * specularFactor * vec3(texture(mat.specular, TexCoord)); //we sample the specular factor from the specular map, set via uniform
-
 	//Apply attenuation
 	ambient *= lightAttenuation;
 	diffuse *= lightAttenuation;
@@ -106,7 +105,6 @@ vec3 CalculatePointLightContribution(PointLight light) //calculates the impact o
 
 vec3 CalculateDirectionalLightContribution() //There is no light attenuation for directional light
 {
-	//vec3 lightDir = normalize(-dirLight.direction.xyz); obtain correction if fed light direction from uniform
 	vec3 lightDir = normalize(dirLight.position - Position);
 
 	//AMBIENT
@@ -123,7 +121,7 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
 	//COMBINING FACTORS
     vec3 diffuse  = dirLight.color * diffuseFactor * vec3(texture(mat.diffuse, TexCoord));
     vec3 specular = dirLight.color * specularFactor * vec3(texture(mat.specular, TexCoord));
-	//return specular;
+ 
 	float shadow = CalculateShadow();
     return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
@@ -145,7 +143,7 @@ void main()
 	//============BLOOM PASS (This does NOT apply bloom, it just checks which fragments are eligible for it)
     float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722)); //we compare the grayscale of the fragment against the "threshold" value for bloom
 
-    if(brightness > 1.0) //if brightness is still above 1.0 (which can be thanks to HDR) we keep the color
+    if(brightness > 2.27) //if brightness is still above 1.0 (which can be thanks to HDR) we keep the color
         BrightnessColor = vec4(FragColor.rgb, 1.0);
     else //if not we basically "discard" the fragment (only for the second texture target, the actual color is still kept and rendered)
         BrightnessColor = vec4(0.0, 0.0, 0.0, 1.0);

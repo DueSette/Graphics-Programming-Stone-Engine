@@ -24,7 +24,7 @@ void PhysicsGameObject::initialiseRandom(glm::vec3 pos)
 	//We select a random entry from each of these arrays, setting them like this makes the process scalable
 	std::string meshNames[] = { "crate2.obj" };
 	std::string textureNames[] = { "grid.png", "checker.png", "bricks.jpg", "pearly.png", "water.jpg" };
-	std::string specularNames[] = { "grid.png", "water.jpg", "pearly.png", "specular_inscriptions" };
+	std::string specularNames[] = { "grid.png", "water.jpg", "pearly.png", "specular_inscriptions.png" };
 	std::string vertexNames[] = { "blinn_phong.vert",};
 	std::string fragmentNames[] = { "blinn_phong.frag" };
 
@@ -48,7 +48,7 @@ void PhysicsGameObject::initialiseRandom(glm::vec3 pos)
 	AddSpecularMap(specularName);
 	_name = meshName;
 
-	setMaterial(0.05f, 128);
+	setMaterial(0.00f, 128);
 	getCollider()->parent = this;
 }
 

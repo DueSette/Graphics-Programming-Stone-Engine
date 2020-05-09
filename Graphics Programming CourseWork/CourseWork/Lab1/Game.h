@@ -51,7 +51,7 @@ private:
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;
 	glm::mat4 directionalLightPerspective;
-	glm::vec3 directionalLightPosition = glm::vec3(41.0f, 90.0f, -21.0f);
+	glm::vec3 directionalLightPosition = glm::vec3(70.0f, 90.0f, -33.0f);
 
 	//HDR and framebuffer processes
 	void setHDR();
@@ -90,7 +90,7 @@ private:
 
 	PhysicsGameObject _map;
 
-	GameObject _box0, _giantMonkey, _explodingMonkey, _environmentMonkey, _dolphin;
+	GameObject _roof0, _roof1, _giantMonkey, _explodingMonkey, _environmentMonkey, _dolphin;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
 

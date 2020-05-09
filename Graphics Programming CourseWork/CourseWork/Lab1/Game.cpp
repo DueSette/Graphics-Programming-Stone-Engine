@@ -48,12 +48,19 @@ void Game::setupStartingScene()
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
-	_map.AddSpecularMap(s_kTextures + "concrete.png");
+	_map.AddSpecularMap(s_kTextures + "hypnotic.png");
 
-	_box0.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(0, 1, 0), ColliderType::NONE);
-	_box0.AddSpecularMap(s_kTextures + "hypnotic.png");
+	_roof0.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, 0), ColliderType::NONE);
+	_roof0.AddSpecularMap(s_kTextures + "hypnotic.png");
+	_roof0.setScale(glm::vec3(1, 15, 15));
+	_roof0.setRotation(glm::vec3(0, 0, 0.5));
 
-	_giantMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(2, 0.5, 0), ColliderType::NONE);
+	_roof1.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, -35), ColliderType::NONE);
+	_roof1.AddSpecularMap(s_kTextures + "hypnotic.png");
+	_roof1.setScale(glm::vec3(1, 15, 15));
+	_roof1.setRotation(glm::vec3(0, 0, 0.5));
+
+	_giantMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(6, 1, 1), ColliderType::NONE);
 	_giantMonkey.AddSpecularMap(s_kTextures + "hypnotic.png");
 
 	_dolphin.initialise(s_kModels + "dolf.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(4, -44, 0), ColliderType::NONE);
@@ -61,22 +68,24 @@ void Game::setupStartingScene()
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
 	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "environment.vert", s_kShaders + "environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
-	
+	_environmentMonkey.setScale(glm::vec3(2.5, 2.5, 2.5));
+
 	//LIGHTBULBS
-	_pointLight0.initialiseLightObject(glm::vec3(-4, 3, -5));
+	_pointLight0.initialiseLightObject(glm::vec3(10, 1, 0));
 	_pointLight0.setLightProperties(PointLightRange::SMALL, COLOR_BLUE);
 
-	_pointLight1.initialiseLightObject(glm::vec3(10, 10, 10));
-	_pointLight1.setLightProperties(PointLightRange::LARGE, COLOR_RED);
+	_pointLight1.initialiseLightObject(glm::vec3(2, 4, 9));
+	_pointLight1.setLightProperties(PointLightRange::SMALL, COLOR_RED);
 
-	_pointLight2.initialiseLightObject(glm::vec3(4, 3, 5));
+	_pointLight2.initialiseLightObject(glm::vec3(-15, 1.5, 8));
 	_pointLight2.setLightProperties(PointLightRange::SMALL, COLOR_GREEN);
 
 	//VECTOR POPULATION
 	physicsGameObjectList.push_back(&_map);
 
 	gameObjectList.push_back(&_map);
-	gameObjectList.push_back(&_box0);
+	gameObjectList.push_back(&_roof0);
+	gameObjectList.push_back(&_roof1);
 	gameObjectList.push_back(&_giantMonkey);
 	gameObjectList.push_back(&_dolphin);
 
@@ -99,8 +108,9 @@ void Game::setupStartingScene()
 	_blurShader->createShaderProgram(s_kShaders + "gaussian_blur.vert", s_kShaders + "gaussian_blur.frag");
 
 	//MATERIAL SETTINGS
-	_map.setMaterial(0.1f, 64);
-	_box0.setMaterial(0.05f, 128);
+	_map.setMaterial(0.05f, 256);
+	_roof0.setMaterial(0.05f, 512);
+	_roof1.setMaterial(0.04f, 512);
 	_giantMonkey.setMaterial(0.05f, 128);
 	_dolphin.setMaterial(0.05f, 128);
 
@@ -335,7 +345,6 @@ void Game::physicsLoop()
 		physicsGameObjectList[i]->updatePhysics();
 		if (physicsGameObjectList[i]->getPosition().y < -115)
 		{
-			//delete physicsGameObjectList[i];
 			physicsGameObjectList[i]->_name = "destroy";
 			physicsGameObjectList.erase(physicsGameObjectList.begin() + i);
 		}
@@ -353,19 +362,20 @@ bool Game::checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec
 
 void Game::logicLoop()
 {
-	_box0.rotate(VECTOR_UP * 0.006f);
-	_box0.translate(VECTOR_UP * 0.01f * sin(counter));
+	//_box0.rotate(VECTOR_UP * 0.006f);
+	_roof0.translate(VECTOR_UP * 0.01f * sin(counter));
 
 	_giantMonkey.rotate(VECTOR_RIGHT * 0.004f);
 
 	_dolphin.rotate(VECTOR_RIGHT * 0.004f);
 
-	_pointLight0.translate(-VECTOR_UP * 0.01f * sin(counter));
-	_pointLight1.translate(VECTOR_UP * 0.01f * sin(counter));
-	_pointLight2.translate(-VECTOR_UP * 0.01f * sin(counter));
+	_pointLight0.translate(VECTOR_RIGHT * 0.05f * sin(counter));
+	_pointLight1.translate(VECTOR_UP * 0.05f * sin(counter));
+	_pointLight2.translate(VECTOR_FORWARD * 0.05f * sin(counter));
 
-	_pointLight0.shiftHue(counter);
-	_pointLight1.shiftHue(counter);
+	//_pointLight0.shiftHue(-counter);
+	//_pointLight1.shiftHue(counter);
+	//_pointLight2.shiftHue(counter/2);
 }
 
 #pragma region ====== RENDERING RELATED METHODS ========
@@ -390,7 +400,6 @@ void Game::renderLoop() //where all the rendering is called from
 		if (g->_name == "destroy")
 		{
 			delete g;
-			std::cout << "NULL POINTER";
 			gameObjectList.erase(gameObjectList.begin() + i);
 			continue;
 		}
@@ -414,7 +423,7 @@ void Game::renderLoop() //where all the rendering is called from
 
 		glm::mat4 modelMatrix = g->getModel();
 		s->setVec3("dirLight.position", directionalLightPosition);
-		s->setVec3("dirLight.color", glm::vec3(0.15f, 0.15f, 0.15f));
+		s->setVec3("dirLight.color", glm::vec3(0.05f, 0.05f, 0.05f));
 
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());
