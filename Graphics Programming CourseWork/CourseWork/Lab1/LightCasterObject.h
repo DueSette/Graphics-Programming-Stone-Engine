@@ -11,9 +11,10 @@ class LightCasterObject : public GameObject
 {
 public:
 	void initialiseLightObject(glm::vec3 pos);
-	void updateShadersWithLight(Shader* s, std::string lightNum);
-
 	void setLightProperties(PointLightRange radius, glm::vec3 color);
+
+	void updateShadersWithLight(Shader* s, std::string lightNum);
+	void shiftHue(float delta);
 	
 	inline glm::vec3 getColor() { return color; }
 private:

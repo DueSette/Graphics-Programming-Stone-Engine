@@ -16,6 +16,13 @@ void LightCasterObject::updateShadersWithLight(Shader* s, std::string lightNum)
 	s->setFloat("lights[" + lightNum + "].quadraticFall", quadraticfallOff);
 }
 
+void LightCasterObject::shiftHue(float delta)
+{
+	color.r = sinf(delta);
+	color.g = -sinf(delta);
+	color.b = cosf(delta);
+}
+
 void LightCasterObject::setLightProperties(PointLightRange radius, glm::vec3 color)
 {
 	this->color = color;

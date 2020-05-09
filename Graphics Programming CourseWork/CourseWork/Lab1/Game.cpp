@@ -251,6 +251,7 @@ void Game::inputUpdate()
 
 				g->mass = 0.6f;
 				physicsGameObjectList.push_back(g);
+				gameObjectList.push_back(g);
 				audioManager.playSound(objectSpawnSound);
 			}
 			break;
@@ -334,12 +335,9 @@ void Game::physicsLoop()
 		physicsGameObjectList[i]->updatePhysics();
 		if (physicsGameObjectList[i]->getPosition().y < -115)
 		{
-			delete physicsGameObjectList[i];
+			//delete physicsGameObjectList[i];
+			physicsGameObjectList[i]->_name = "destroy";
 			physicsGameObjectList.erase(physicsGameObjectList.begin() + i);
-		}
-		else if(physicsGameObjectList[i]->_name == s_kModels + "bust1.obj")
-		{
-			physicsGameObjectList[i]->rotate(glm::vec3(0, 0.9f * deltaTime, 0));
 		}
 	}
 }
@@ -362,9 +360,12 @@ void Game::logicLoop()
 
 	_dolphin.rotate(VECTOR_RIGHT * 0.004f);
 
-	_pointLight0.translate(VECTOR_UP * 0.1f * sin(counter));
-	_pointLight1.translate(VECTOR_RIGHT * 0.1f * sin(counter));
-	_pointLight2.translate(VECTOR_FORWARD * 0.1f * sin(counter));
+	_pointLight0.translate(-VECTOR_UP * 0.01f * sin(counter));
+	_pointLight1.translate(VECTOR_UP * 0.01f * sin(counter));
+	_pointLight2.translate(-VECTOR_UP * 0.01f * sin(counter));
+
+	_pointLight0.shiftHue(counter);
+	_pointLight1.shiftHue(counter);
 }
 
 #pragma region ====== RENDERING RELATED METHODS ========
@@ -383,8 +384,16 @@ void Game::renderLoop() //where all the rendering is called from
 	_depthShader->bind(); //we set the shader that will write to the depth texture
 	_depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
 
-	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
+	for (int i = 0; i < gameObjectList.size(); i++) //Retrieves all shader-related informations and issues draw call
 	{
+		GameObject* g = gameObjectList[i];
+		if (g->_name == "destroy")
+		{
+			delete g;
+			std::cout << "NULL POINTER";
+			gameObjectList.erase(gameObjectList.begin() + i);
+			continue;
+		}
 		g->drawShadowMap(_depthShader); //draw each object's shadow
 	}	
 
