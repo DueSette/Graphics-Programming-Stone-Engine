@@ -52,7 +52,6 @@ float CalculateShadow()
 	 //we need to offset the depth of the fragment by an amount that depends on the angle between the light and the direction of the surface to avoid shadow-acne
 	 float shadowOffset = max(0.01 * (1.0 - dot(Normal, -normalize(vec3(dirLight.position) - Position))), 0.005);
 
-
 	 //======= SOFT SHADOWING PROCESS
 	 vec2 texelSize = 1.0 / textureSize(shadowMap, 0); //we get the size of ONE texel (divide shadowmap size at mip0 by one)
 	 int passes = 0;
@@ -108,7 +107,7 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
 	vec3 lightDir = normalize(dirLight.position - Position);
 
 	//AMBIENT
-	vec3 ambient = mat.ambient * vec3(texture(mat.diffuse, TexCoord));
+	vec3 ambient = dirLight.color * mat.ambient * vec3(texture(mat.diffuse, TexCoord));
 	
     // DIFFUSE
     float diffuseFactor = max(dot(Normal, dirLight.position), 0.0);

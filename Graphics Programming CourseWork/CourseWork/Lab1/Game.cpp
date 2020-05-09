@@ -50,12 +50,12 @@ void Game::setupStartingScene()
 	_map.setPosition(-VECTOR_UP * 3.0f);
 	_map.AddSpecularMap(s_kTextures + "hypnotic.png");
 
-	_roof0.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, 0), ColliderType::NONE);
+	_roof0.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, 15), ColliderType::NONE);
 	_roof0.AddSpecularMap(s_kTextures + "hypnotic.png");
 	_roof0.setScale(glm::vec3(1, 15, 15));
 	_roof0.setRotation(glm::vec3(0, 0, 0.5));
 
-	_roof1.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, -35), ColliderType::NONE);
+	_roof1.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, -28), ColliderType::NONE);
 	_roof1.AddSpecularMap(s_kTextures + "hypnotic.png");
 	_roof1.setScale(glm::vec3(1, 15, 15));
 	_roof1.setRotation(glm::vec3(0, 0, 0.5));
@@ -71,14 +71,14 @@ void Game::setupStartingScene()
 	_environmentMonkey.setScale(glm::vec3(2.5, 2.5, 2.5));
 
 	//LIGHTBULBS
-	_pointLight0.initialiseLightObject(glm::vec3(10, 1, 0));
+	_pointLight0.initialiseLightObject(glm::vec3(20, 1, 0));
 	_pointLight0.setLightProperties(PointLightRange::SMALL, COLOR_BLUE);
 
-	_pointLight1.initialiseLightObject(glm::vec3(2, 4, 9));
-	_pointLight1.setLightProperties(PointLightRange::SMALL, COLOR_RED);
+	_pointLight1.initialiseLightObject(glm::vec3(2, 5, 9));
+	_pointLight1.setLightProperties(PointLightRange::MEDIUM, COLOR_RED);
 
-	_pointLight2.initialiseLightObject(glm::vec3(-15, 1.5, 8));
-	_pointLight2.setLightProperties(PointLightRange::SMALL, COLOR_GREEN);
+	_pointLight2.initialiseLightObject(glm::vec3(-20, 1.5, -20));
+	_pointLight2.setLightProperties(PointLightRange::MEDIUM, COLOR_GREEN);
 
 	//VECTOR POPULATION
 	physicsGameObjectList.push_back(&_map);
@@ -373,7 +373,7 @@ void Game::logicLoop()
 	_pointLight1.translate(VECTOR_UP * 0.05f * sin(counter));
 	_pointLight2.translate(VECTOR_FORWARD * 0.05f * sin(counter));
 
-	//_pointLight0.shiftHue(-counter);
+	_pointLight0.shiftHue(-counter);
 	//_pointLight1.shiftHue(counter);
 	//_pointLight2.shiftHue(counter/2);
 }
@@ -423,7 +423,7 @@ void Game::renderLoop() //where all the rendering is called from
 
 		glm::mat4 modelMatrix = g->getModel();
 		s->setVec3("dirLight.position", directionalLightPosition);
-		s->setVec3("dirLight.color", glm::vec3(0.05f, 0.05f, 0.05f));
+		s->setVec3("dirLight.color", glm::vec3(0.15f, 0.15f, 0.15f));
 
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());
