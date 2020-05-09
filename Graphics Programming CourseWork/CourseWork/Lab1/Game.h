@@ -42,6 +42,8 @@ private:
 	void renderLoop();
 	void renderQuadInFrontOfCamera(); //this draws a quad in front of the camera, it is used to process framebuffer textures
 
+	void renderMonkeys();
+
 	//Shadowmapping processes
 	void setShadowMap();
 	void configureDirectionalLightPerspective();
@@ -63,7 +65,6 @@ private:
 	Shader* _blurShader;
 	unsigned int pingpongTextures[2];
 	unsigned int pingpongFramebuffers[2];
-	bool horizontalBlurring = true, firstBlurPass = true;
 	int blurPassesAmount = 10;
 
 	//Skybox methods and fields
@@ -72,7 +73,6 @@ private:
 	Texture skybox;
 	void setSkybox();
 	void renderSkybox();
-
 
 	//In-scene illumination 
 	void retrieveLightData(Shader* s);
@@ -90,7 +90,7 @@ private:
 
 	PhysicsGameObject _map;
 
-	GameObject _box0, _box1, _explodingMonkey, _phongMonkey, _environmentMonkey;
+	GameObject _box0, _box1, _explodingMonkey, _environmentMonkey;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
 

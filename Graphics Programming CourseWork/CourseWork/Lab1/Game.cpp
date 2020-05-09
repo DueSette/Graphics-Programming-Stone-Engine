@@ -56,7 +56,6 @@ void Game::setupStartingScene()
 	_box1.AddSpecularMap(s_kTextures + "crate_specular.png");
 
 	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "vertex_explosionShader.vert", s_kShaders + "geometry_explosionShader.geom", s_kShaders + "fragment_explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
-	_phongMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_phong.vert", s_kShaders + "fragment_phong.frag", glm::vec3(-4, 1, 0), ColliderType::NONE);
 	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "vertex_environment.vert", s_kShaders + "fragment_environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
 	
 	//LIGHTBULBS
@@ -361,30 +360,33 @@ void Game::logicLoop()
 }
 
 #pragma region ====== RENDERING RELATED METHODS ========
+
 void Game::renderLoop() //where all the rendering is called from
 {
 	_gameDisplay.clearDisplay(1.0, 0.2, 0.2, 0); //Screen is cleared to red to make it easy to spot the difference between rendering wrong and not rendering
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//DEPTH PASS LOOP	
-	_depthShader->bind(); //we set the shader that will write to the depth texture
-	_depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
-
+	//==============
+	//DEPTH PASS LOOP (we create the shadowmap as seen from the dir-light perspective)
+	//==============
 	glViewport(0, 0, 1024, 1024); //resolution of the shadowmap, not the actual screen
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
+	_depthShader->bind(); //we set the shader that will write to the depth texture
+	_depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
+
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
 	{
-		g->drawShadowMap(_depthShader);
-	}
+		g->drawShadowMap(_depthShader); //draw each object's shadow
+	}	
 
-	//RESET BUFFER DATA
+	//==============
+	//HDR PASS LOOP (this is the actual rendering of the scene: we save the values to the HDR framebuffer for additional processing)
+	//==============
+
 	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer); //unbind depth framebuffer and bind HDR buffer
 	glViewport(0, 0, _gameDisplay.getInfo().width, _gameDisplay.getInfo().height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//HDR PASS LOOP (this is the actual rendering of the scene, but we save the values to the HDR framebuffer for additional processing)
 
 	for (GameObject* g : gameObjectList) //Retrieves all shader-related informations and issues draw call
 	{	
@@ -416,56 +418,34 @@ void Game::renderLoop() //where all the rendering is called from
 		l->drawProcedure(_player.cam);
 	}
 
-	{
-		//EXPLODING SHADER ONLY, this is for the lab assignment task
-		Shader* s = _explodingMonkey.exposeShaderProgram();
-		s->setFloat("u_Time", counter);
-		_explodingMonkey.drawProcedure(_player.cam);
+	renderSkybox();
+	renderMonkeys(); //since these are coursework related, shadows and bloom won't be applied to them to avoid "tampering"
 
-		//PHONG-SHADING ONLY, this is for the lab assignment task
-		s = _phongMonkey.exposeShaderProgram();
-		s->setMat4("ModelMatrix", _phongMonkey.getModel());
-		s->setVec3("LightPosition", directionalLightPosition);
-		s->setVec3("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-		s->setVec3("CameraPosition", _player.cam.getPosition());
-		s->setVec3("Ka", glm::vec3(0.1, 0.1, 0.2));
-		s->setVec3("Kd", glm::vec3(0.3, 0.3, 0.3));
-		s->setVec3("Ks", glm::vec3(1.0, 1.0, 0.6));
-		s->setFloat("Shininess", 32.0);
-		_phongMonkey.drawProcedure(_player.cam);
-
-		//Skybox procedure
-		renderSkybox();
-
-		//Environment mapping procedure
-		s = _environmentMonkey.exposeShaderProgram();
-		s->setVec3("CameraPosition", _player.cam.getPosition());
-		s->setMat4("ViewProjectionMatrix", _player.cam.GetViewProjection());
-		s->setMat4("ModelMatrix", _environmentMonkey.getModel());
-		s->setInt("skyTexture", 0);
-		_environmentMonkey.drawProcedure(_player.cam);
-	}
-
-	//BLUR PASS
-	
+	//==============
+	//BLUR PASS LOOP (we blur the second hdr framebuffer's output texture using the gaussian's formula
+	//==============
+	bool horizontalBlurring = true, firstBlurPass = true; //local variables
 	_blurShader->bind();
 
-	horizontalBlurring = true;
-	firstBlurPass = true;
-
-	for (unsigned int i = 0; i < blurPassesAmount; i++)
+	for (unsigned int i = 0; i < blurPassesAmount; i++) //we re-render the same scene texture multiple times, blurring it more with each pass
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFramebuffers[horizontalBlurring]);
-		_blurShader->setInt("horizontal", horizontalBlurring);
-		glBindTexture(GL_TEXTURE_2D, firstBlurPass ? hdrTextures[1] : pingpongTextures[!horizontalBlurring]);  // bind texture of other framebuffer (or scene if first iteration)
+		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFramebuffers[horizontalBlurring]); //each time we swap framebuffers
+		_blurShader->setBool("horizontal", horizontalBlurring);
+
+		if (firstBlurPass) //if first iteration, bind the scene texture, which contains everything that has been rendered so far
+			glBindTexture(GL_TEXTURE_2D, hdrTextures[1]);
+		else //after the first pass, we swap the texture that we are drawing to each time
+			glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontalBlurring]); 
 		
-		renderQuadInFrontOfCamera(); //we render the previous scene as a texture on a quad, and apply blurring processing on that texture
-		horizontalBlurring = !horizontalBlurring;
+		renderQuadInFrontOfCamera(); //we apply blurring processing on that texture, once horizontally, then vertically and so on
+		horizontalBlurring = !horizontalBlurring; //toggle boolean, so each iteration it "ping-pongs" all the methods that read this bool
 
 		if (firstBlurPass) { firstBlurPass = false; }
 	}
 
+	//==============
 	//BLOOM AND TONEMAPPING PASS
+	//==============
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); //we switch to the default framebuffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -701,5 +681,21 @@ void Game::renderQuadInFrontOfCamera() //manually places a quad in front of came
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+
+void Game::renderMonkeys() //renders the two coursework monkeys in a separate method so they are easier to find
+{
+	//Environment mapping shader procedure
+	Shader* s = _environmentMonkey.exposeShaderProgram();
+	s->setVec3("CameraPosition", _player.cam.getPosition());
+	s->setMat4("ViewProjectionMatrix", _player.cam.GetViewProjection());
+	s->setMat4("ModelMatrix", _environmentMonkey.getModel());
+	s->setInt("skyTexture", 0);
+	_environmentMonkey.drawProcedure(_player.cam);
+
+	//Exploding shader procedure
+	s = _explodingMonkey.exposeShaderProgram();
+	s->setFloat("u_Time", counter);
+	_explodingMonkey.drawProcedure(_player.cam);
 }
 #pragma endregion
