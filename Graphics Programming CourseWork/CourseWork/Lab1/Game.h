@@ -44,7 +44,7 @@ private:
 
 	//Shadowmapping processes
 	void setShadowMap();
-	void ConfigureLightPerspective();
+	void configureDirectionalLightPerspective();
 	Shader* _depthShader = nullptr;
 	unsigned int depthMapFrameBuffer;
 	unsigned int depthMapTexture;
@@ -70,8 +70,8 @@ private:
 	GLuint skyboxVAO, skyboxVBO, cubemapTexture;
 	Shader* _skyboxShader;
 	Texture skybox;
-	void StartupSkybox();
-	void DrawSkybox();
+	void setSkybox();
+	void renderSkybox();
 
 
 	//In-scene illumination 

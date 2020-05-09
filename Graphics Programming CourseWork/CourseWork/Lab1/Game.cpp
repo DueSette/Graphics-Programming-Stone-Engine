@@ -22,11 +22,11 @@ void Game::init()
 
 	_player.cam.initialiseCamera
 	(
-		vec3(0.0f, 2.0f, -10.0f),
-		70.0f,
-		(float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height,
-		0.01f,
-		1000.0f
+		vec3(0.0f, 2.0f, -10.0f), //Starting pos
+		70.0f, //FOV
+		(float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //Aspect ratio
+		0.01f, //Near clip
+		1000.0f //Far clip
 	);
 
 	glEnable(GL_DEPTH_TEST);
@@ -35,7 +35,7 @@ void Game::init()
 	setShadowMap();
 	setHDR();
 	setBloom();
-	ConfigureLightPerspective();
+	configureDirectionalLightPerspective();
 }
 
 void Game::setupStartingScene()
@@ -86,7 +86,7 @@ void Game::setupStartingScene()
 
 	_skyboxShader = new Shader();
 	_skyboxShader->createShaderProgram(s_kShaders + "shaderSkybox.vert", s_kShaders + "shaderSkybox.frag");
-	StartupSkybox();
+	setSkybox();
 
 	_tonemapperShader = new Shader();
 	_tonemapperShader->createShaderProgram(s_kShaders + "vertex_tonemapper.vert", s_kShaders + "fragment_tonemapper.frag");
@@ -339,6 +339,15 @@ void Game::physicsLoop()
 	}
 }
 
+bool Game::checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2)
+{
+	if (abs(pos1.x - pos2.x) < s1.x + s2.x)
+		if (abs(pos1.y - pos2.y) < s1.y + s2.y)
+			return (abs(pos1.z - pos2.z) < s1.z + s2.z);
+
+	return false;
+}
+
 void Game::logicLoop()
 {
 	_box0.rotate(VECTOR_UP * 0.006f); //TODO MAKE THIS SEPARATE LOGIC LOOP
@@ -351,26 +360,17 @@ void Game::logicLoop()
 
 }
 
-void Game::retrieveLightData(Shader* s) //updates all the lit shaders with each light's data
+#pragma region ====== RENDERING RELATED METHODS ========
+void Game::renderLoop() //where all the rendering is called from
 {
-	int x = 0;
-	for (LightCasterObject* light : lightCastersList)
-	{
-		light->updateShadersWithLight(s, std::to_string(x));
-		x++;
-	}
-}
-
-void Game::renderLoop()
-{
-	_gameDisplay.clearDisplay(1.0, 0.2, 0.2, 0);
+	_gameDisplay.clearDisplay(1.0, 0.2, 0.2, 0); //Screen is cleared to red to make it easy to spot the difference between rendering wrong and not rendering
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//DEPTH PASS LOOP	
 	_depthShader->bind(); //we set the shader that will write to the depth texture
 	_depthShader->setMat4("lightSpaceMatrix", directionalLightPerspective);
 
-	glViewport(0, 0, 1024, 1024);
+	glViewport(0, 0, 1024, 1024); //resolution of the shadowmap, not the actual screen
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFrameBuffer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -435,7 +435,7 @@ void Game::renderLoop()
 		_phongMonkey.drawProcedure(_player.cam);
 
 		//Skybox procedure
-		DrawSkybox();
+		renderSkybox();
 
 		//Environment mapping procedure
 		s = _environmentMonkey.exposeShaderProgram();
@@ -484,6 +484,33 @@ void Game::renderLoop()
 	_gameDisplay.swapBuffer();
 }
 
+void Game::retrieveLightData(Shader* s) //updates all the lit shaders with each light's data
+{
+	int x = 0;
+	for (LightCasterObject* light : lightCastersList)
+	{
+		light->updateShadersWithLight(s, std::to_string(x));
+		x++;
+	}
+}
+
+void Game::configureDirectionalLightPerspective()
+{
+	//we use a directional light and test depth from its perspective (orthogonal projection, because the light is directional)
+
+	float nearClip = 1.0f, farClip = 100.0f;
+	//create projection matrix
+	glm::mat4 lightProjection = glm::perspective(70.0f, (float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //FoV and aspect ratio
+		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
+
+	//create light look-at matrix (AKA view matrix)
+	glm::mat4 lightView = glm::lookAt(directionalLightPosition, //light pos
+		glm::vec3(0, 0, 0), //position the light is looking at
+		glm::vec3(0, 1, 0)); //simply up vector
+
+	directionalLightPerspective = lightProjection * lightView; //this resulting matrix is not very different from an MVP one (minus the model)
+}
+
 void Game::setShadowMap()
 {
 	//SHADOWMAPPING - we set a shadowmap buffer: it draws to a texture where only depth is stored
@@ -511,62 +538,41 @@ void Game::setShadowMap()
 	glReadBuffer(GL_NONE);
 }
 
-void Game::ConfigureLightPerspective()
-{
-	//we use a directional light and test depth from its perspective (orthogonal projection, because the light is directional)
-
-	float nearClip = 1.0f, farClip = 100.0f;
-	glm::mat4 lightProjection = glm::perspective(70.0f, (float)_gameDisplay.getInfo().width / _gameDisplay.getInfo().height, //FoV and aspect ratio
-		nearClip, farClip); //clipping planes still exist, objects outside will not produce a shadow map (won't be tested for depth)
-
-	//create light look-at matrix
-	glm::mat4 lightView = glm::lookAt(directionalLightPosition, //light pos
-		glm::vec3(0, 0, 0), //position the light is looking at
-		glm::vec3(0, 1, 0)); //simply up vector
-
-	directionalLightPerspective = lightProjection * lightView; //this resulting matrix is not very different from an MVP one (minus the model)
-}
-
 void Game::setHDR()
 {
 	glGenFramebuffers(1, &hdrFrameBuffer); //we create a new framebuffer used for the HDR pass
 	glBindFramebuffer(GL_FRAMEBUFFER, hdrFrameBuffer);
-	// create floating point color buffer
+	// create floating point textures
 	glGenTextures(2, hdrTextures);
 	for (int i = 0; i < sizeof(hdrTextures) / sizeof(*hdrTextures); i++) //we repeat this process once for the hdr texture and once for the bloom texture
 	{
 		std::cout << i << " ITER ITER " << std::endl;
 		glBindTexture(GL_TEXTURE_2D, hdrTextures[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1080, 720, 0, GL_RGBA, GL_FLOAT, NULL); //These textures is FLOATING POINT, so it can store high dynamic range
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 1080, 720, 0, GL_RGBA, GL_FLOAT, NULL); //These textures are FLOATING POINT, so they can store high dynamic range
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, hdrTextures[i], 0); //we bind both 
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, hdrTextures[i], 0); //we bind both to the same framebuffer
 	}
 
 	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachments); //we tell the framebuffer to store TWO outputs from the fragment shader
+	glDrawBuffers(2, attachments); //we tell the framebuffer to store TWO outputs from the fragment shader, it does not happen automatically
 
-	// create depth buffer (renderbuffer) UNCLEAR
+	// create depth buffer (renderbuffer)
 	unsigned int rboDepth;
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1080, 720);
-
-	// attach buffers
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth); 	// Attach depth component to renderbuffer
 }
 
 void Game::setBloom()
 {
-	glGenFramebuffers(2, pingpongFramebuffers); //create textures for the pingpong framebuffer
-	glGenTextures(2, pingpongTextures);
+	glGenFramebuffers(2, pingpongFramebuffers); //Create two framebuffers which will switch back and forth
+	glGenTextures(2, pingpongTextures); //Unlike HDR framebuffer, this time we have two framebuffers with two textures. Not one FBO with two attachments.
 
-	for (unsigned int i = 0; i < 2; i++)
+	for (unsigned int i = 0; i < 2; i++) //Bind textures to framebuffers
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFramebuffers[i]); //select buffer
 
@@ -577,11 +583,11 @@ void Game::setBloom()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongTextures[i], 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongTextures[i], 0);
 	}
 }
 
-void Game::StartupSkybox()
+void Game::setSkybox()
 {
 	std::vector<std::string> faces
 	{
@@ -650,7 +656,7 @@ void Game::StartupSkybox()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 }
 
-void Game::DrawSkybox()
+void Game::renderSkybox()
 {
 	glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 	_skyboxShader->bind();
@@ -667,10 +673,10 @@ void Game::DrawSkybox()
 	glDepthFunc(GL_LESS); // set depth function back to default
 }
 
-void Game::renderQuadInFrontOfCamera()
+void Game::renderQuadInFrontOfCamera() //manually places a quad in front of camera
 {
-	unsigned int quadVAO = 0;
-	unsigned int quadVBO;
+	static unsigned int quadVAO = 0; //making the buffers static prevents the memory leak that comes from binding a new VAO/VBO all the time
+	static unsigned int quadVBO;
 
 	if (quadVAO == 0)
 	{
@@ -682,8 +688,8 @@ void Game::renderQuadInFrontOfCamera()
 			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 		};
 		// setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
+		glGenVertexArrays(1, &quadVAO); //Vertex array object
+		glGenBuffers(1, &quadVBO); //Vertex buffer object
 		glBindVertexArray(quadVAO);
 		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
@@ -696,12 +702,4 @@ void Game::renderQuadInFrontOfCamera()
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 }
-
-bool Game::checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec3& pos2)
-{
-	if (abs(pos1.x - pos2.x) < s1.x + s2.x)
-		if (abs(pos1.y - pos2.y) < s1.y + s2.y)
-			return (abs(pos1.z - pos2.z) < s1.z + s2.z);
-
-	return false;
-}
+#pragma endregion
