@@ -35,6 +35,7 @@ uniform PointLight[3] lights;
 uniform Material mat;
 uniform sampler2D shadowMap;
 
+
 //calculates whether the current fragment is in shadow by using depth testing from the directional light's perspective
 float CalculateShadow()
 {
@@ -80,7 +81,7 @@ vec3 CalculatePointLightContribution(PointLight light) //calculates the impact o
 	float lightAttenuation = 1.0 / (light.constantFall + light.linearFall * distanceFromLight + light.quadraticFall * (distanceFromLight * distanceFromLight));
 
 	//CALC AMBIENT
-	vec3 ambient = texelColor * mat.ambient;
+	vec3 ambient = light.color * texelColor * mat.ambient;
 
 	//CALC DIFFUSE
     vec3 lightDir = normalize(vec3(light.pos) - Position);
@@ -98,6 +99,11 @@ vec3 CalculatePointLightContribution(PointLight light) //calculates the impact o
 	ambient *= lightAttenuation;
 	diffuse *= lightAttenuation;
 	specular *= lightAttenuation;
+
+	if(specularFactor > 0) //makes it easier to see the specular map
+	{
+		diffuse = vec3(0);
+	}
 
 	return ambient + diffuse + specular;
 }
@@ -120,7 +126,12 @@ vec3 CalculateDirectionalLightContribution() //There is no light attenuation for
 	//COMBINING FACTORS
     vec3 diffuse  = dirLight.color * diffuseFactor * vec3(texture(mat.diffuse, TexCoord));
     vec3 specular = dirLight.color * specularFactor * vec3(texture(mat.specular, TexCoord));
- 
+
+	if(specularFactor > 0) //makes it easier to see the specular map
+	{
+		diffuse = vec3(0);
+	}
+
 	float shadow = CalculateShadow();
     return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
@@ -140,6 +151,7 @@ void main()
 	FragColor = vec4(result, 1.0); //The actual color of the pixel, not to be confused with what's below
 
 	//============BLOOM PASS (This does NOT apply bloom, it just checks which fragments are eligible for it)
+
     float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722)); //we compare the grayscale of the fragment against the "threshold" value for bloom
 
     if(brightness > 2.27) //if brightness is still above 1.0 (which can be thanks to HDR) we keep the color

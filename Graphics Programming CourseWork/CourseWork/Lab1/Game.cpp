@@ -60,21 +60,20 @@ void Game::setupStartingScene()
 	_roof1.setScale(glm::vec3(1, 15, 15));
 	_roof1.setRotation(glm::vec3(0, 0, 0.5));
 
-	_giantMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(6, 1, 1), ColliderType::NONE);
+	_giantMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "gold.jpg", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(15, 1, 15), ColliderType::NONE);
 	_giantMonkey.AddSpecularMap(s_kTextures + "hypnotic.png");
 
 	_dolphin.initialise(s_kModels + "dolf.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(4, -44, 0), ColliderType::NONE);
 	_dolphin.AddSpecularMap(s_kTextures + "hypnotic.png");
 
-	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "grid.png", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-4, -4, 0), ColliderType::NONE);
-	_environmentMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "concrete.png", s_kShaders + "environment.vert", s_kShaders + "environment.frag", glm::vec3(2, 2, 5), ColliderType::NONE);
-	_environmentMonkey.setScale(glm::vec3(2.5, 2.5, 2.5));
+	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "gold.jpg", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-10, 3, 15), ColliderType::NONE);
+	_environmentD20.initialise(s_kModels + "d20.obj", s_kTextures + "concrete.png", s_kShaders + "environment.vert", s_kShaders + "environment.frag", glm::vec3(2, 2.2, 8), ColliderType::NONE);
 
 	//LIGHTBULBS
 	_pointLight0.initialiseLightObject(glm::vec3(20, 1, 0));
 	_pointLight0.setLightProperties(PointLightRange::SMALL, COLOR_BLUE);
 
-	_pointLight1.initialiseLightObject(glm::vec3(2, 5, 9));
+	_pointLight1.initialiseLightObject(glm::vec3(7, 5, 22));
 	_pointLight1.setLightProperties(PointLightRange::MEDIUM, COLOR_RED);
 
 	_pointLight2.initialiseLightObject(glm::vec3(-20, 1.5, -20));
@@ -362,10 +361,11 @@ bool Game::checkCollisions(glm::vec3 s1, glm::vec3 s2, glm::vec3& pos1, glm::vec
 
 void Game::logicLoop()
 {
-	//_box0.rotate(VECTOR_UP * 0.006f);
 	_roof0.translate(VECTOR_UP * 0.01f * sin(counter));
+	_roof1.translate(-VECTOR_UP * 0.01f * sin(counter));
 
-	_giantMonkey.rotate(VECTOR_RIGHT * 0.004f);
+	_environmentD20.rotate(-VECTOR_UP * 0.003f);
+	_giantMonkey.rotate(VECTOR_UP * 0.02f);
 
 	_dolphin.rotate(VECTOR_RIGHT * 0.004f);
 
@@ -374,8 +374,8 @@ void Game::logicLoop()
 	_pointLight2.translate(VECTOR_FORWARD * 0.05f * sin(counter));
 
 	_pointLight0.shiftHue(-counter);
-	//_pointLight1.shiftHue(counter);
-	//_pointLight2.shiftHue(counter/2);
+	_pointLight1.shiftHue(counter);
+	_pointLight2.shiftHue(counter/2);
 }
 
 #pragma region ====== RENDERING RELATED METHODS ========
@@ -423,7 +423,7 @@ void Game::renderLoop() //where all the rendering is called from
 
 		glm::mat4 modelMatrix = g->getModel();
 		s->setVec3("dirLight.position", directionalLightPosition);
-		s->setVec3("dirLight.color", glm::vec3(0.15f, 0.15f, 0.15f));
+		s->setVec3("dirLight.color", glm::vec3(0.10f, 0.10f, 0.10f));
 
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());
@@ -477,7 +477,7 @@ void Game::renderLoop() //where all the rendering is called from
 
 	glActiveTexture(GL_TEXTURE0); //we bind the render texture that was blurred in the previous post-processing step
 	glBindTexture(GL_TEXTURE_2D, hdrTextures[0]);
-	glActiveTexture(GL_TEXTURE1); //we bind 
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontalBlurring]);
 
 	_tonemapperShader->bind();
@@ -712,12 +712,12 @@ void Game::renderQuadInFrontOfCamera() //manually places a quad in front of came
 void Game::renderMonkeys() //renders the two coursework monkeys in a separate method so they are easier to find
 {
 	//Environment mapping shader procedure
-	Shader* s = _environmentMonkey.exposeShaderProgram();
+	Shader* s = _environmentD20.exposeShaderProgram();
 	s->setVec3("CameraPosition", _player.cam.getPosition());
 	s->setMat4("ViewProjectionMatrix", _player.cam.GetViewProjection());
-	s->setMat4("ModelMatrix", _environmentMonkey.getModel());
+	s->setMat4("ModelMatrix", _environmentD20.getModel());
 	s->setInt("skyTexture", 0);
-	_environmentMonkey.drawProcedure(_player.cam);
+	_environmentD20.drawProcedure(_player.cam);
 
 	//Exploding shader procedure
 	s = _explodingMonkey.exposeShaderProgram();

@@ -23,15 +23,15 @@ void PhysicsGameObject::initialiseRandom(glm::vec3 pos)
 	std::string meshName, textureName, specularName, vertShader, fragShader;
 	//We select a random entry from each of these arrays, setting them like this makes the process scalable
 	std::string meshNames[] = { "crate2.obj" };
-	std::string textureNames[] = { "grid.png", "checker.png", "bricks.jpg", "pearly.png", "water.jpg" };
-	std::string specularNames[] = { "grid.png", "water.jpg", "pearly.png", "specular_inscriptions.png" };
+	std::string textureNames[] = { "gold.jpg", "bricks.jpg", "pearly.png", "water.jpg" };
+	std::string specularNames[] = { "concrete.png", "hypnotic.png", "wood.png" };
 	std::string vertexNames[] = { "blinn_phong.vert",};
 	std::string fragmentNames[] = { "blinn_phong.frag" };
 
 	//this is deterministic random generation, not recommended but good enough in this case
 	int r = rand() % (sizeof(meshNames) / sizeof(*meshNames));
 	meshName = s_kModels + meshNames[r];
-
+	
 	r = rand() % (sizeof(textureNames) / sizeof(*textureNames));
 	textureName = s_kTextures + textureNames[r];
 
