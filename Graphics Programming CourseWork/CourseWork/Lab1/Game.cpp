@@ -423,7 +423,7 @@ void Game::renderLoop() //where all the rendering is called from
 
 		glm::mat4 modelMatrix = g->getModel();
 		s->setVec3("dirLight.position", directionalLightPosition);
-		s->setVec3("dirLight.color", glm::vec3(0.10f, 0.10f, 0.10f));
+		s->setVec3("dirLight.color", glm::vec3(1, 1, 1));
 
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());

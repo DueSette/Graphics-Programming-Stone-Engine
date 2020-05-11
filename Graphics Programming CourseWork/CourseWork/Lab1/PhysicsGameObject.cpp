@@ -25,7 +25,7 @@ void PhysicsGameObject::initialiseRandom(glm::vec3 pos)
 	std::string meshNames[] = { "crate2.obj" };
 	std::string textureNames[] = { "gold.jpg", "bricks.jpg", "pearly.png", "water.jpg" };
 	std::string specularNames[] = { "concrete.png", "hypnotic.png", "wood.png" };
-	std::string vertexNames[] = { "blinn_phong.vert",};
+	std::string vertexNames[] = { "blinn_phong.vert" };
 	std::string fragmentNames[] = { "blinn_phong.frag" };
 
 	//this is deterministic random generation, not recommended but good enough in this case
