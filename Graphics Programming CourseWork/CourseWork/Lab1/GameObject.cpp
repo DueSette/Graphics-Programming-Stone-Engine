@@ -104,9 +104,6 @@ void GameObject::drawProcedure(const Camera& cam) //all the graphics-related ope
 void GameObject::drawShadowMap(Shader* s) //updates depth shader for shadow processing
 {
 	s->setMat4("model", getModel());
-	//_baseMap->Bind(0);
-	//if (_specularMap != nullptr) { _specularMap->Bind(1); }
-
 	_mesh->draw();
 }
 

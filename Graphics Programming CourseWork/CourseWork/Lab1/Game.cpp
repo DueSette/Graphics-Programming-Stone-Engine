@@ -71,7 +71,7 @@ void Game::setupStartingScene()
 
 	//LIGHTBULBS
 	_pointLight0.initialiseLightObject(glm::vec3(20, 1, 0));
-	_pointLight0.setLightProperties(PointLightRange::SMALL, COLOR_BLUE);
+	_pointLight0.setLightProperties(PointLightRange::MEDIUM, COLOR_BLUE);
 
 	_pointLight1.initialiseLightObject(glm::vec3(7, 5, 22));
 	_pointLight1.setLightProperties(PointLightRange::MEDIUM, COLOR_RED);

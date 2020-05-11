@@ -2,8 +2,6 @@
 
 PhysicsGameObject::PhysicsGameObject()
 {
-	if (!bounceSound)
-		bounceSound = audioManager.loadSound("..\\res\\audio\\bounce.wav");
 }
 
 void PhysicsGameObject::initialise(const std::string& meshName, const std::string& textureName, const std::string& vertShader, const std::string& fragShader, glm::vec3 pos, ColliderType ct)
@@ -63,8 +61,6 @@ void PhysicsGameObject::onCollision()
 			isKinematic = true;
 			velocity.y = 0.0f;
 		}
-		else
-			audioManager.playSound(bounceSound);
 	}
 }
 

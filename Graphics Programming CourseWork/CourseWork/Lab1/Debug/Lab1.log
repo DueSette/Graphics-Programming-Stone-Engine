@@ -7,4 +7,8 @@ C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\G
 C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(385,44): warning C4305: 'argument': truncation from 'double' to 'float'
 C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(397,20): warning C4018: '<': signed/unsigned mismatch
 C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(456,29): warning C4018: '<': signed/unsigned mismatch
+  Main.cpp
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\GameObject.h(18,2): warning C4091: 'typedef ': ignored on left of 'Material' when no variable is declared
+  Generating Code...
   Lab1.vcxproj -> C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Debug\CourseWork.exe

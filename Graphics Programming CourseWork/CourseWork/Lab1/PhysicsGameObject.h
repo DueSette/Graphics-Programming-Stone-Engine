@@ -28,6 +28,4 @@ public:
 private:
 	glm::vec3 velocity;
 	float fixedTime = 0.2f; // this is basically unity's fixed timestep, it cannot be replaced by deltaTime as it needs to be a lot more consistent
-
-	unsigned int bounceSound;
 };

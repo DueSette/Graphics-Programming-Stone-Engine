@@ -5,16 +5,12 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-//Passing out texture coordinates
-//out vec2 TexCoords;
-
 //Passing in texture coordinates
 in block {
     vec2 tCrd;
 } gs_in[];
 
 out vec2 coords;
-
 
 //Uniform variabe
 uniform float u_Time;
@@ -45,11 +41,11 @@ void main()
 
 //Setting current vertex position
  for (int i = 0; i < gl_in.length(); i++) 
-{
-    gl_Position = explode(gl_in[i].gl_Position, normal);
-    coords = gs_in[i].tCrd;
-    EmitVertex();
-}
+    {
+        gl_Position = explode(gl_in[i].gl_Position, normal);
+        coords = gs_in[i].tCrd;
+        EmitVertex();
+    }
 
     EndPrimitive();    
 }
