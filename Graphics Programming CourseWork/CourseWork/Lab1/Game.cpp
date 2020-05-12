@@ -48,7 +48,7 @@ void Game::setupStartingScene()
 	_map.setScale(glm::vec3(20, 20, 20));
 	_map.setColliderSize(30, 0.6f, 30);
 	_map.setPosition(-VECTOR_UP * 3.0f);
-	_map.AddSpecularMap(s_kTextures + "hypnotic.png");
+	_map.AddSpecularMap(s_kTextures + "water.jpg");
 
 	_roof0.initialise(s_kModels + "crate2.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(35, 35, 15), ColliderType::NONE);
 	_roof0.AddSpecularMap(s_kTextures + "hypnotic.png");
@@ -166,6 +166,16 @@ void Game::inputUpdate()
 			{
 				camSpeedX = 17.0f * deltaTime;
 			}
+
+			if (keyboard_state[SDL_SCANCODE_UP])
+			{
+				bloomThresholdUniform -= 0.1;
+			}
+			if (keyboard_state[SDL_SCANCODE_DOWN])
+			{
+				bloomThresholdUniform += 0.1;
+			}
+
 		}
 
 		else if (e.type == SDL_KEYUP && e.key.repeat == 0)
@@ -423,11 +433,12 @@ void Game::renderLoop() //where all the rendering is called from
 
 		glm::mat4 modelMatrix = g->getModel();
 		s->setVec3("dirLight.position", directionalLightPosition);
-		s->setVec3("dirLight.color", glm::vec3(1, 1, 1));
+		s->setVec3("dirLight.color", glm::vec3(1.55, 1.55, 1.55));
 
 		s->setMat4("ModelMatrix", modelMatrix);
 		s->setVec3("CameraPosition", _player.cam.getPosition());
 		s->setMat4("lightPerspectiveMatrix", directionalLightPerspective);
+		s->setFloat("bloomThreshold", bloomThresholdUniform);
 		retrieveLightData(s); //puts lights data into lit shader
 		
 		glActiveTexture(GL_TEXTURE2);

@@ -63,6 +63,7 @@ private:
 	//Bloom processes
 	void setBloom();
 	Shader* _blurShader;
+	float bloomThresholdUniform = 0.75f;
 	unsigned int pingpongTextures[2];
 	unsigned int pingpongFramebuffers[2];
 	int blurPassesAmount = 10;

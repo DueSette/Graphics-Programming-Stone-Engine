@@ -3,3 +3,4 @@ SPACE - Jump
 LEFT MOUSE - Spawn random item
 MOUSEWHEEL - Faster movement
 1, 2, 3, 4, 5 Set Exposure values
+UP ARROW / DOWN ARROW - Make bloom more/less pronounced
