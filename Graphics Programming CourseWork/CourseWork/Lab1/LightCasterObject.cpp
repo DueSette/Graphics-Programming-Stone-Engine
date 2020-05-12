@@ -27,7 +27,7 @@ void LightCasterObject::setLightProperties(PointLightRange radius, glm::vec3 col
 {
 	this->color = color;
 
-	switch (radius) //for the purpose of this project there is no need to make this any more powerful than this
+	switch (radius)
 	{
 	case PointLightRange::SMALL: //simulates distance of 20 units
 		linearFalloff = 0.22f;

@@ -475,14 +475,14 @@ void Game::renderLoop() //where all the rendering is called from
 	glBindFramebuffer(GL_FRAMEBUFFER, 0); //we switch to the default framebuffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glActiveTexture(GL_TEXTURE0); //we bind the render texture that was blurred in the previous post-processing step
+	glActiveTexture(GL_TEXTURE0); //we bind the HDR colour texture
 	glBindTexture(GL_TEXTURE_2D, hdrTextures[0]);
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE1); //we bind the render texture that was blurred in the previous step
 	glBindTexture(GL_TEXTURE_2D, pingpongTextures[!horizontalBlurring]);
 
 	_tonemapperShader->bind();
-	_tonemapperShader->setInt("hdrBufferTexture", 0); //we feed that same texture as a sampler for the tonemapping shader, which will apply postprocess
-	_tonemapperShader->setInt("brightBlurredTexture", 1); //we feed that same texture as a sampler for the tonemapping shader, which will apply postprocess
+	_tonemapperShader->setInt("hdrBufferTexture", 0);
+	_tonemapperShader->setInt("brightBlurredTexture", 1);
 	_tonemapperShader->setFloat("exposure", exposure);
 
 	renderQuadInFrontOfCamera();//we render a quad while the tonemapper is bound and output the scene

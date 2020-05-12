@@ -14,9 +14,6 @@ uniform mat4 u_Transform;
 
 uniform mat4 lightPerspectiveMatrix; //we can see the depth of the resulting fragment using this matrix: used for shadows
 
-//uniform mat3 ViewMatrix;
-//uniform mat4 ProjectionMatrix;
-
 void main()
 {
 	TexCoord = VertexTexCoord;
