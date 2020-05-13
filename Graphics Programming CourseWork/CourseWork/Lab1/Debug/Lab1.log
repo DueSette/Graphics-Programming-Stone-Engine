@@ -1,43 +1,12 @@
-﻿  Audio.cpp
-  Camera.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  Collider.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  LightCasterObject.cpp
+﻿  Game.cpp
 C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
 C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\GameObject.h(18,2): warning C4091: 'typedef ': ignored on left of 'Material' when no variable is declared
-  PhysicsGameObject.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\GameObject.h(18,2): warning C4091: 'typedef ': ignored on left of 'Material' when no variable is declared
-  Display.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  Game.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\GameObject.h(18,2): warning C4091: 'typedef ': ignored on left of 'Material' when no variable is declared
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(172,33): warning C4305: '-=': truncation from 'double' to 'float'
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(176,33): warning C4305: '+=': truncation from 'double' to 'float'
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(291,20): warning C4018: '<': signed/unsigned mismatch
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(306,21): warning C4018: '<': signed/unsigned mismatch
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(352,20): warning C4018: '<': signed/unsigned mismatch
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(395,44): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(407,20): warning C4018: '<': signed/unsigned mismatch
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(467,29): warning C4018: '<': signed/unsigned mismatch
-  GameObject.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\GameObject.h(18,2): warning C4091: 'typedef ': ignored on left of 'Material' when no variable is declared
-  Main.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\GameObject.h(18,2): warning C4091: 'typedef ': ignored on left of 'Material' when no variable is declared
-  Model.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  obj_loader.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\obj_loader.cpp(378,16): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-  Player.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  Shader.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  Utilities.cpp
-C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Utilities.h(34,55): warning C4091: 'typedef ': ignored on left of 'DebugMessageTier' when no variable is declared
-  Generating Code...
-  stb_image.c
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(173,33): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(177,33): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(292,20): warning C4018: '<': signed/unsigned mismatch
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(307,21): warning C4018: '<': signed/unsigned mismatch
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(353,20): warning C4018: '<': signed/unsigned mismatch
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(396,44): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(408,20): warning C4018: '<': signed/unsigned mismatch
+C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Lab1\Game.cpp(468,29): warning C4018: '<': signed/unsigned mismatch
   Lab1.vcxproj -> C:\Projects\Programming Stuff\Visual Studio Projects\C++\_Graphics Programming\GraphicsProgramming CourseWork\Graphics-Programming-Visualiser\Graphics Programming CourseWork\CourseWork\Debug\CourseWork.exe

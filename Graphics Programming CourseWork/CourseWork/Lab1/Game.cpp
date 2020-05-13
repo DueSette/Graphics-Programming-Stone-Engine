@@ -66,8 +66,9 @@ void Game::setupStartingScene()
 	_dolphin.initialise(s_kModels + "dolf.obj", s_kTextures + "concrete.png", s_kShaders + "blinn_phong.vert", s_kShaders + "blinn_phong.frag", glm::vec3(4, -44, 0), ColliderType::NONE);
 	_dolphin.AddSpecularMap(s_kTextures + "hypnotic.png");
 
-	_explodingMonkey.initialise(s_kModels + "monkey3.obj", s_kTextures + "gold.jpg", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-10, 3, 15), ColliderType::NONE);
+	_explodingD20.initialise(s_kModels + "d20.obj", s_kTextures + "grid.png", s_kShaders + "explosionShader.vert", s_kShaders + "explosionShader.geom", s_kShaders + "explosionShader.frag", glm::vec3(-10, 3, 15), ColliderType::NONE);
 	_environmentD20.initialise(s_kModels + "d20.obj", s_kTextures + "concrete.png", s_kShaders + "environment.vert", s_kShaders + "environment.frag", glm::vec3(2, 2.2, 8), ColliderType::NONE);
+	_explodingD20.setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 
 	//LIGHTBULBS
 	_pointLight0.initialiseLightObject(glm::vec3(20, 1, 0));
@@ -731,8 +732,8 @@ void Game::renderMonkeys() //renders the two coursework monkeys in a separate me
 	_environmentD20.drawProcedure(_player.cam);
 
 	//Exploding shader procedure
-	s = _explodingMonkey.exposeShaderProgram();
+	s = _explodingD20.exposeShaderProgram();
 	s->setFloat("u_Time", counter);
-	_explodingMonkey.drawProcedure(_player.cam);
+	_explodingD20.drawProcedure(_player.cam);
 }
 #pragma endregion

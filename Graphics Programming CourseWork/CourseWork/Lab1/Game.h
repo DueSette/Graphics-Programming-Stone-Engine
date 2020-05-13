@@ -91,7 +91,7 @@ private:
 
 	PhysicsGameObject _map;
 
-	GameObject _roof0, _roof1, _giantMonkey, _explodingMonkey, _environmentD20, _dolphin;
+	GameObject _roof0, _roof1, _giantMonkey, _explodingD20, _environmentD20, _dolphin;
 
 	LightCasterObject _pointLight0, _pointLight1, _pointLight2;
 
